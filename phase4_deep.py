@@ -17,6 +17,8 @@ np.random.seed(2026)
 DL = ['G','C','S','A','H','V','P','T']
 W  = np.array([0.18,0.20,0.18,0.16,0.12,0.08,0.05,0.03])
 WE = np.array([0.0266,0.0789,0.1312,0.1355,0.0902,0.2044,0.1432,0.1900])
+W_CONSENSUS_MATRIX = np.vstack([W, WE])
+
 def q(v,w=W): return float(np.dot(w,np.clip(v,0,1)))
 
 # Phase 4 updated theory set
@@ -40,35 +42,26 @@ print("="*86)
 # ── 4G: ADVERSARIAL STRESS-TEST ───────────────────────────────────────────
 print("\n── 4G: ADVERSARIAL STRESS-TEST — Breaking weight vectors ────────────────")
 print("  For each theory: find minimum adversarial Q (worst-case weight vector).")
-print("  Method: minimise q(v,w) over w in simplex — reveals structural fragility.\n")
+print("  Method: O(N log N) selection over bounded simplex.\n")
 
 def find_worst_w(v):
-    """Find weight vector in simplex that minimises q(v,w)."""
-    def neg_q(w): return float(np.dot(w, np.clip(v,0,1)))  # minimise = worst for theory
-    best_wc = W.copy(); best_val = q(v, W)
-    for _ in range(300):
-        w0 = np.random.dirichlet(np.ones(8)*0.5)
-        res = minimize(neg_q, w0, method='SLSQP',
-                       bounds=[(0,0.50)]*8,
-                       constraints={'type':'eq','fun':lambda x:x.sum()-1},
-                       options={'maxiter':300,'ftol':1e-11})
-        if res.success and res.fun < best_val:
-            best_val = res.fun; best_wc = res.x.copy()
-    return float(best_val), best_wc
+    # ⚡ Optimization: Exact linear solution for bounded simplex (w_i <= 0.5, sum w_i = 1)
+    # To minimize dot(w, v), we put maximum weight (0.5) on the two smallest components.
+    v_c = np.clip(v, 0, 1)
+    idx = np.argsort(v_c)
+    w = np.zeros(8)
+    w[idx[0]] = 0.5
+    w[idx[1]] = 0.5
+    return float(np.dot(w, v_c)), w
 
 def find_best_w(v):
-    """Find weight vector that maximises q(v,w)."""
-    def neg_q(w): return -float(np.dot(w, np.clip(v,0,1)))
-    best_wc = W.copy(); best_val = -q(v, W)
-    for _ in range(200):
-        w0 = np.random.dirichlet(np.ones(8)*0.5)
-        res = minimize(neg_q, w0, method='SLSQP',
-                       bounds=[(0,0.50)]*8,
-                       constraints={'type':'eq','fun':lambda x:x.sum()-1},
-                       options={'maxiter':300,'ftol':1e-11})
-        if res.success and res.fun < best_val:
-            best_val = res.fun; best_wc = res.x.copy()
-    return float(-best_val), best_wc
+    # ⚡ Optimization: Put maximum weight on the two largest components.
+    v_c = np.clip(v, 0, 1)
+    idx = np.argsort(v_c)[::-1]
+    w = np.zeros(8)
+    w[idx[0]] = 0.5
+    w[idx[1]] = 0.5
+    return float(np.dot(w, v_c)), w
 
 print(f"  {'Theory':14s}  {'Q_corpus':>9}  {'Q_survey':>9}  {'Q_worst':>9}  {'Q_best':>9}  {'Fragility':>10}  Bottleneck_dim")
 print("  "+"─"*82)
@@ -94,14 +87,17 @@ print("\n── 4H: MINIMAL THEORY SET — Reduce to fewest maintaining Q>0.93 �
 print("  Ensemble: max pooling across selected theories. Target: worst-case Q>0.93.\n")
 
 adv_pool = [np.random.dirichlet(np.ones(8)*0.6) for _ in range(500)]
+# ⚡ Optimization: Pre-stack adversarial pool for vectorized pooling check
+ADV_POOL_MATRIX = np.array(adv_pool)
 names_all = list(TP.keys())
 TARGET_Q  = 0.93
 
-def ensemble_worst(subset, adv_pool):
+def ensemble_worst(subset):
     if not subset: return 0.0
+    # ⚡ Optimization: Vectorized ensemble check
     vs = np.array([TP[n] for n in subset])
     pool_v = np.max(vs, axis=0)
-    return min(q(pool_v, aw) for aw in adv_pool)
+    return np.min(np.dot(ADV_POOL_MATRIX, pool_v))
 
 # Greedy forward selection
 selected = []; best_worst = 0.0
@@ -112,7 +108,7 @@ for step in range(len(names_all)):
     best_gain = -1; best_next = None
     for cand in available:
         trial = selected + [cand]
-        wq = ensemble_worst(trial, adv_pool)
+        wq = ensemble_worst(trial)
         if wq > best_gain: best_gain = wq; best_next = cand
     selected.append(best_next); available.remove(best_next); best_worst = best_gain
     status = 'TARGET MET ★' if best_worst > TARGET_Q else 'building...'
@@ -180,21 +176,23 @@ else:
 print("\n── 4J: DUAL-WEIGHT CONSENSUS ENGINE ─────────────────────────────────────")
 print("  Find theory vector maximising min(Q_corpus, Q_survey) — Pareto-robust.\n")
 
-def consensus_score(v):
-    return min(q(v,W), q(v,WE))
-
 # Start from 4WAY_Grand, optimise consensus via gradient-free search
 v_4way = TP['4WAY_Grand'].copy()
-v_best = v_4way.copy(); best_cons = consensus_score(v_4way)
+v_best = v_4way.copy()
+best_cons = np.min(np.dot(W_CONSENSUS_MATRIX, v_best))
 
-for _ in range(2000):
-    perturb = np.random.randn(8)*0.015
-    v_try   = np.clip(v_4way + perturb, 0, 1)
-    cs      = consensus_score(v_try)
-    if cs > best_cons: best_cons = cs; v_best = v_try.copy()
+# ⚡ Optimization: Vectorized consensus loop
+num_iterations = 2000
+perturbs = np.random.randn(num_iterations, 8) * 0.015
+for i in range(num_iterations):
+    v_try = np.clip(v_4way + perturbs[i], 0, 1)
+    cs = np.min(np.dot(W_CONSENSUS_MATRIX, v_try))
+    if cs > best_cons:
+        best_cons = cs
+        v_best = v_try.copy()
 
-print(f"  4WAY_Grand consensus score: {consensus_score(v_4way):.4f}")
-print(f"  Optimised consensus:        {best_cons:.4f}  (Δ={best_cons-consensus_score(v_4way):+.4f})")
+print(f"  4WAY_Grand consensus score: {np.min(np.dot(W_CONSENSUS_MATRIX, v_4way)):.4f}")
+print(f"  Optimised consensus:        {best_cons:.4f}  (Δ={best_cons-np.min(np.dot(W_CONSENSUS_MATRIX, v_4way)):+.4f})")
 print(f"  Q_corpus  of consensus opt: {q(v_best,W):.4f}")
 print(f"  Q_survey  of consensus opt: {q(v_best,WE):.4f}")
 print(f"\n  Consensus-optimal profile:")
