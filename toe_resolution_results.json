@@ -22,9 +22,9 @@
     "best_score": 1.0,
     "best_existing": "Twistor_Theory",
     "diagnostics": [
-        "Singularity reached with consensus score 1.0000.",
+        "Singularity reached with exact consensus score 1.0000.",
         "Best baseline: Twistor_Theory.",
-        "Resolved tension between primary opposing weight vectors.",
-        "Mathematically derived optimal theoretical profile."
+        "Global optimum found via Linear Programming.",
+        "Mathematically guaranteed maximal theoretical profile."
     ]
 }

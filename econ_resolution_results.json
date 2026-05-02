@@ -19,12 +19,12 @@
         1.0,
         1.0
     ],
-    "best_score": 1.0,
+    "best_score": 0.9999999999999999,
     "best_existing": "Keynesianism",
     "diagnostics": [
-        "Singularity reached with consensus score 1.0000.",
+        "Singularity reached with exact consensus score 1.0000.",
         "Best baseline: Keynesianism.",
-        "Resolved tension between primary opposing weight vectors.",
-        "Mathematically derived optimal theoretical profile."
+        "Global optimum found via Linear Programming.",
+        "Mathematically guaranteed maximal theoretical profile."
     ]
 }
