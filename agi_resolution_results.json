@@ -1,13 +1,13 @@
 {
     "dimensions": [
-        "GEN",
-        "ENT",
-        "EPI",
-        "SEN",
-        "MET",
-        "AUT",
+        "RSC",
         "TEL",
-        "INF"
+        "BLK",
+        "MET",
+        "REP",
+        "PLT",
+        "SIM",
+        "STA"
     ],
     "v_best": [
         1.0,
@@ -20,10 +20,10 @@
         1.0
     ],
     "best_score": 1.0,
-    "best_existing": "Epigenetic_Shift",
+    "best_existing": "Gaia_Cyber_Organism",
     "diagnostics": [
         "Singularity reached with exact consensus score 1.0000.",
-        "Best baseline: Epigenetic_Shift.",
+        "Best baseline: Gaia_Cyber_Organism.",
         "Global optimum found via Linear Programming.",
         "Mathematically guaranteed maximal theoretical profile."
     ]
