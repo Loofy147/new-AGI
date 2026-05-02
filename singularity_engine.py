@@ -9,20 +9,26 @@ class SingularityEngine:
     def __init__(self, data):
         self.dims = data['dimensions']
         self.weights = data['weights']
+        # ⚡ Optimization: Pre-convert weights to a matrix for vectorized dot products
+        self.weight_matrix = np.array(list(self.weights.values()))
         self.TP = data['theories']
 
-    def q(self, v, w): return float(np.dot(w, np.clip(v, 0, 1)))
+    def q(self, v, w):
+        # Kept for backward compatibility if needed, but not used in optimized loop
+        return float(np.dot(w, np.clip(v, 0, 1)))
 
     def consensus_score(self, v):
-        scores = [self.q(v, w) for w in self.weights.values()]
-        return min(scores)
+        # ⚡ Optimization: Vectorized calculation of all scores at once
+        # v is expected to be clipped to [0, 1] by the caller (optimize loop)
+        return np.min(np.dot(self.weight_matrix, v))
 
     def optimize(self, iterations=10000):
         # Start from the best existing theory
         best_existing = None
         best_existing_score = -1
         for name, v in self.TP.items():
-            score = self.consensus_score(v)
+            # Ensure input is clipped for consistency
+            score = self.consensus_score(np.clip(v, 0, 1))
             if score > best_existing_score:
                 best_existing_score = score
                 best_existing = name
@@ -30,9 +36,12 @@ class SingularityEngine:
         v_best = self.TP[best_existing].copy()
         best_score = best_existing_score
 
-        for _ in range(iterations):
-            perturb = np.random.randn(len(self.dims)) * 0.015
-            v_try = np.clip(v_best + perturb, 0, 1)
+        # ⚡ Optimization: Pre-generate all perturbations at once
+        num_dims = len(self.dims)
+        perturbations = np.random.randn(iterations, num_dims) * 0.015
+
+        for i in range(iterations):
+            v_try = np.clip(v_best + perturbations[i], 0, 1)
             score = self.consensus_score(v_try)
             if score > best_score:
                 best_score = score
