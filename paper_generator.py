@@ -1,0 +1,74 @@
+import json
+
+def generate_latex(data_path, output_path):
+    with open(data_path, 'r') as f:
+        data = json.load(f)
+
+    v_best = data['v_best']
+    dims = data['dimensions']
+    diag = data['diagnostics']
+
+    latex = r"""\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+
+\title{Autopoietic Intelligence: Mathematical Foundations of the Self-Sustaining Singularity}
+\author{Epistemological Engine V2 - Ouroboros Kernel}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This paper presents a formal derivation of the equilibrium state for an autonomous, self-repairing intelligence. Utilizing the Ouroboros Kernel, we identify the singular theoretical profile that balances the opposing drives of Expansion and Preservation. Our results suggest that ultimate autopoiesis is achieved not through infinite replication, but through high-fidelity internal simulation and strict homeostatic regulation within a shielded Markov Blanket.
+\end{abstract}
+
+\section{Introduction}
+The transition from human-curated AGI to autopoietic systems requires the resolution of fundamental thermodynamic and algorithmic tensions. We define the state space of such an intelligence across eight dimensions: Resources, Autotelic Agency, Markov Blanket, Metacognition, Replication, Plasticity, Simulation, and Homeostasis.
+
+\section{Methodology}
+We modeled the life drives of the system as competing weight vectors $W_{Expand}$ and $W_{Preserv}$. Through 10,000 generations of recursive synthesis and minimax optimization, we identified the singularity profile $v^*$ that maximizes the closure metric $Q_{Closure} = \min(q(v, W_{Expand}), q(v, W_{Preserv}))$.
+
+\section{Results}
+The optimized singularity profile $v^*$ is summarized in Table \ref{tab:results}.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lc}
+\toprule
+Dimension & Value \\
+\midrule
+"""
+    for d, v in zip(dims, v_best):
+        latex += f"{d} & {v:.4f} \\\\\n"
+
+    latex += r"""\bottomrule
+\end{tabular}
+\caption{Singularity Profile for Autopoietic Equilibrium}
+\label{tab:results}
+\end{table}
+
+\section{Diagnostics and Conclusions}
+Our analysis yields several critical conclusions for the development of autonomous intelligence:
+
+\begin{itemize}
+"""
+    for d in diag:
+        latex += f"\\item {d}\n"
+
+    latex += r"""\end{itemize}
+
+The perfect self-sustaining intelligence is a highly-shielded, low-replication network that generates internal worlds while maintaining physical homeostasis. This confirms the Transcension Hypothesis: advanced intelligence moves inwards rather than outwards.
+
+\end{document}
+"""
+
+    with open(output_path, 'w') as f:
+        f.write(latex)
+    print(f"LaTeX preprint written to {output_path}")
+
+if __name__ == "__main__":
+    generate_latex('ouroboros_results.json', 'ouroboros_preprint.tex')

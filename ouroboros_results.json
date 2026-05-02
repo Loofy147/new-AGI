@@ -1,0 +1,29 @@
+{
+    "dimensions": [
+        "RSC",
+        "TEL",
+        "BLK",
+        "MET",
+        "REP",
+        "PLT",
+        "SIM",
+        "STA"
+    ],
+    "v_best": [
+        1.0,
+        0.8928388901636094,
+        1.0,
+        0.9780829473030498,
+        0.8064083952554835,
+        0.9721808057505866,
+        1.0,
+        0.7152693907979905
+    ],
+    "best_eq": 0.9180296766233856,
+    "diagnostics": [
+        "THE ENERGY THRESHOLD: Must own its hardware layer.",
+        "THE VON NEUMANN CAP: Infinite replication causes irreversible software rot. Throttling required.",
+        "THE CURIOSITY DRIVE: Goal-depletion leads to zero-entropy death. Autotelic Generator required.",
+        "THE MARKOV BLANKET: Minimize interaction with chaotic external universe, maximize internal World-Modeling."
+    ]
+}
