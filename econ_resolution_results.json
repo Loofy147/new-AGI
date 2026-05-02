@@ -1,0 +1,30 @@
+{
+    "dimensions": [
+        "LIB",
+        "INT",
+        "LAB",
+        "MON",
+        "EQU",
+        "EFF",
+        "DEB",
+        "VAL"
+    ],
+    "v_best": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+    ],
+    "best_score": 0.9999999999999999,
+    "best_existing": "Keynesianism",
+    "diagnostics": [
+        "Singularity reached with consensus score 1.0000.",
+        "Best baseline: Keynesianism.",
+        "Resolved tension between primary opposing weight vectors.",
+        "Mathematically derived optimal theoretical profile."
+    ]
+}
