@@ -1,14 +1,3 @@
-"""
-UNIFIED SINGULARITY ENGINE v2 — FULLY LOCAL, EXACT
-===================================================
-Embedding: TF-IDF + Truncated SVD (Latent Semantic Analysis)
-  - No network. No HuggingFace. Deterministic.
-  - Scientifically valid: LSA recovers latent semantic axes from term co-occurrence.
-LP: Theory-manifold constrained exact consensus (HiGHS solver)
-Adversarial: Greedy O(1) exact + vectorized 1000-scenario stress test
-Cross-cartridge: Structural isomorphism mapping with correlation scores
-Paper: Full machine-verified LaTeX preprint
-"""
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD
@@ -58,16 +47,19 @@ def lp_manifold(theories, W_mat):
     mixture = {names[i]: float(lam[i]) for i in range(N) if lam[i] > 0.005}
     return v_opt, t_opt, mixture
 
-def stress_vectorized(v, n=1000):
+def stress_vectorized(theories, n=1000):
     """Matrix multiply stress test. One operation for all theories."""
-    v_clip = np.clip(v, 0, 1)
-    adv = np.random.dirichlet(np.ones(len(v_clip))*0.4, n)    # (n, D)
-    scores = adv @ v_clip                                     # (n,)
+    names = list(theories.keys())
+    V = np.array([np.clip(theories[n],0,1) for n in names])  # (N, D)
+    adv = np.random.dirichlet(np.ones(V.shape[1])*0.4, n)    # (n, D)
+    scores = adv @ V.T                                         # (n, N)
     return {
-        'worst_stoch': float(np.percentile(scores, 1)),
-        'worst_exact': float(np.min(v_clip)),
-        'mean':        float(np.mean(scores)),
-        'fragility':   float(np.max(v_clip) - np.min(v_clip)),
+        names[i]: {
+            'worst_stoch': float(np.percentile(scores[:,i], 1)),
+            'worst_exact': float(np.min(V[i])),
+            'mean':        float(np.mean(scores[:,i])),
+            'fragility':   float(np.max(V[i]) - np.min(V[i])),
+        } for i in range(len(names))
     }
 
 def embed_corpus(texts, n_dims=8):
@@ -169,94 +161,98 @@ CORPORA = {
 }
 
 # ═══════════════════════════════════════════════════════════════════════════
-# WEIGHT TENSORS (derived from expert camp tension)
+# WEIGHT TENSORS
 # ═══════════════════════════════════════════════════════════════════════════
 
 CARTRIDGES = {
 'CONSCIOUSNESS': {
-    'dims': ['Grounding','Certainty','Structure','Applicability','Coherence','Generativity','Presentation','Temporal'],
-    'W': np.array([
-        [0.28,0.25,0.15,0.12,0.08,0.05,0.04,0.03], # Empiricist
-        [0.08,0.10,0.22,0.06,0.26,0.12,0.10,0.06], # Philosopher
-        [0.12,0.14,0.10,0.34,0.14,0.08,0.05,0.03], # Clinician
-        [0.18,0.20,0.20,0.22,0.10,0.06,0.02,0.02], # AI Researcher
-    ]),
+    'W': {
+        'Empiricist':    np.array([0.28,0.25,0.15,0.12,0.08,0.05,0.04,0.03]),
+        'Philosopher':   np.array([0.08,0.10,0.22,0.06,0.26,0.12,0.10,0.06]),
+        'Clinician':     np.array([0.12,0.14,0.10,0.34,0.14,0.08,0.05,0.03]),
+        'AI_Researcher': np.array([0.18,0.20,0.20,0.22,0.10,0.06,0.02,0.02]),
+    },
 },
 'TOE': {
-    'dims': ['Independence','Discreteness','Symmetry','Testability','Elegance','Gravity','Holism','Determinism'],
-    'W': np.array([
-        [0.25, 0.20, 0.05, 0.05, 0.20, 0.20, 0.05, 0.00], # Fundamentalist
-        [0.05, 0.05, 0.15, 0.30, 0.05, 0.10, 0.15, 0.15], # Phenomenologist
-    ]),
+    'W': {
+        'Fundamentalist':  np.array([0.25, 0.20, 0.05, 0.05, 0.20, 0.20, 0.05, 0.00]),
+        'Phenomenologist': np.array([0.05, 0.05, 0.15, 0.30, 0.05, 0.10, 0.15, 0.15]),
+    },
 },
 'AGING': {
-    'dims': ['Genetic','Entropy','Epigenetic','Senescence','Metabolic','Autophagy','Telomere','Inflammation'],
-    'W': np.array([
-        [0.30, 0.05, 0.25, 0.05, 0.10, 0.10, 0.15, 0.00], # Programmer
-        [0.05, 0.30, 0.05, 0.20, 0.10, 0.10, 0.00, 0.20], # Accumulator
-    ]),
+    'W': {
+        'Programmer':   np.array([0.30, 0.05, 0.25, 0.05, 0.10, 0.10, 0.15, 0.00]),
+        'Accumulator':  np.array([0.05, 0.30, 0.05, 0.20, 0.10, 0.10, 0.00, 0.20]),
+    },
 },
 'ECON': {
-    'dims': ['Liberal','Intervention','Labour','Monetary','Equity','Efficiency','Debt','Value'],
-    'W': np.array([
-        [0.40, 0.00, 0.00, 0.10, 0.00, 0.40, 0.00, 0.10], # Individualist
-        [0.00, 0.30, 0.30, 0.00, 0.30, 0.00, 0.10, 0.00], # Collectivist
-    ]),
+    'W': {
+        'Individualist': np.array([0.40, 0.00, 0.00, 0.10, 0.00, 0.40, 0.00, 0.10]),
+        'Collectivist':  np.array([0.00, 0.30, 0.30, 0.00, 0.30, 0.00, 0.10, 0.00]),
+    },
 },
 'AGI_LANG': {
-    'dims': ['Execution','Meta','Verification','Difficulty','Concurrency','Memory','Symbolic','Syntax'],
-    'W': np.array([
-        [0.25, 0.05, 0.05, 0.25, 0.20, 0.05, 0.05, 0.10], # Scale Engineer
-        [0.05, 0.15, 0.25, 0.05, 0.05, 0.20, 0.20, 0.05], # Alignment Lab
-    ]),
+    'W': {
+        'ScaleEngineer': np.array([0.25, 0.05, 0.05, 0.25, 0.20, 0.05, 0.05, 0.10]),
+        'AlignmentLab':   np.array([0.05, 0.15, 0.25, 0.05, 0.05, 0.20, 0.20, 0.05]),
+    },
 },
 'OUROBOROS': {
-    'dims': ['Resource','Teleology','Blanket','Metacog','Replication','Plasticity','Simulation','Stability'],
-    'W': np.array([
-        [0.20, 0.15, 0.02, 0.15, 0.25, 0.18, 0.05, 0.00], # Expansionist
-        [0.10, 0.05, 0.20, 0.05, 0.00, 0.05, 0.25, 0.30], # Preservationist
-    ]),
+    'W': {
+        'Expansionist':  np.array([0.20, 0.15, 0.02, 0.15, 0.25, 0.18, 0.05, 0.00]),
+        'Preservationist': np.array([0.10, 0.05, 0.20, 0.05, 0.00, 0.05, 0.25, 0.30]),
+    },
 },
 }
 
 # ═══════════════════════════════════════════════════════════════════════════
-# EXECUTION ENGINE
+# MAIN EXECUTION
 # ═══════════════════════════════════════════════════════════════════════════
 
 def run_unified_engine():
     print("="*80)
-    print("  UNIFIED SINGULARITY ENGINE v2 — THE COLLAPSE")
+    print("  UNIFIED SINGULARITY ENGINE v2 — FULLY LOCAL, EXACT")
     print("="*80)
 
     results_all = {}
     optimal_vectors = {}
 
-    for domain, corpus_data in CORPORA.items():
-        print(f"\n>>> Processing Domain: {domain}")
-        texts = [c[1] for c in corpus_data]
-        names = [c[0] for c in corpus_data]
+    # For cross-domain isomorphism, we need a shared semantic space.
+    # We embed ALL domains into a single global LSA space.
+    all_texts = []
+    offsets = {}
+    cursor = 0
+    for domain in CORPORA:
+        texts = [c[1] for c in CORPORA[domain]]
+        all_texts.extend(texts)
+        offsets[domain] = (cursor, cursor + len(texts))
+        cursor += len(texts)
 
-        # 1. Semantic Extraction
-        v_matrix, var_explained = embed_corpus(texts)
+    global_v, _ = embed_corpus(all_texts)
+
+    for domain in CORPORA:
+        print(f"\n>>> Processing Domain: {domain}")
+        start, end = offsets[domain]
+        v_matrix = global_v[start:end]
+        names = [c[0] for c in CORPORA[domain]]
         theories_dict = {names[i]: v_matrix[i] for i in range(len(names))}
 
-        # 2. LP Manifold Consensus
-        W_mat = CARTRIDGES[domain]['W']
+        # LP Consensus
+        W_mat = np.array(list(CARTRIDGES[domain]['W'].values()))
         v_opt, q_score, mixture = lp_manifold(theories_dict, W_mat)
 
-        # 3. Adversarial Stress
-        stress = stress_vectorized(v_opt)
+        # Stress test
+        stress = stress_vectorized(theories_dict)
 
         results_all[domain] = {
             "v_opt": v_opt.tolist(),
             "q_score": q_score,
             "mixture": mixture,
-            "stress": stress,
-            "variance_explained": var_explained.tolist()
+            "robustness": stress,
         }
         optimal_vectors[domain] = v_opt
 
-    # 4. Cross-Domain Isomorphism (Correlation Analysis)
+    # Cross-Domain Isomorphism
     print("\n--- Identifying Cross-Domain Isomorphisms ---")
     isomorphisms = []
     domain_list = list(optimal_vectors.keys())
@@ -264,13 +260,13 @@ def run_unified_engine():
         for j in range(i + 1, len(domain_list)):
             d1, d2 = domain_list[i], domain_list[j]
             r, _ = spearmanr(optimal_vectors[d1], optimal_vectors[d2])
-            isomorphisms.append(f"Isomorphism {d1} <-> {d2}: r={r:+.3f}")
+            isomorphisms.append({"pair": (d1, d2), "score": float(r)})
             if abs(r) > 0.6:
                 print(f"  [SIGNAL] {d1} ↔ {d2} is a strong cross-domain signal (r={r:+.2f})")
 
     results_all["isomorphisms"] = isomorphisms
 
-    # 5. Output
+    # Output
     os.makedirs('results', exist_ok=True)
     json_path = 'results/unified_results.json'
     tex_path = 'results/unified_preprint.tex'

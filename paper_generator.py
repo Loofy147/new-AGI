@@ -20,8 +20,8 @@ def generate_latex(data_path, output_path):
 \usepackage{geometry}
 \geometry{margin=1in}
 
-\title{The Unified Epistemological Engine: Resolving Theoretical Deadlocks Across Physics, Biology, Economics, and Intelligence}
-\author{Jules Singularity Framework V3}
+\title{The Unified Epistemological Engine v2: Cross-Domain Manifold Consensus}
+\author{Jules Singularity Framework}
 \date{\today}
 
 \begin{document}
@@ -29,64 +29,70 @@ def generate_latex(data_path, output_path):
 \maketitle
 
 \begin{abstract}
-This paper presents the results of a unified epistemological execution across six disparate theoretical domains. By collapsing these domains into a single mathematical framework using manifold-constrained linear programming and semantic dimension extraction from real scientific corpora (ArXiv), we identify a cross-domain structural isomorphism. Our results demonstrate that the same mathematical kernel resolves conflicts between generativity and structural certainty across all domains simultaneously.
+This paper presents exact manifold-constrained consensus results for six theoretical domains. Using Latent Semantic Analysis (LSA) on specialized corpora, we identify optimal theoretical mixtures that resolve structural deadlocks between antagonistic expert camps.
 \end{abstract}
 
-\section{Introduction}
-Theoretical research is often siloed. However, many fields face the same fundamental tension: the conflict between the drive for expansion and the necessity of structural stability. We propose that these are the same mathematical object viewed through different domain lenses.
-
 \section{Methodology}
-We utilized a unified pipeline:
-\begin{enumerate}
-    \item \textbf{Data Sourcing (ArXiv)}: Live abstracts were fetched via the ArXiv API for domains including Physics, Neuroscience, and AGI Architecture.
-    \item \textbf{Semantic Extraction}: Corpora were embedded using transformer-based models and projected onto 8-dimensional orthogonal axes of tension via PCA.
-    \item \textbf{Manifold-Constrained LP}: Consensus theoretical profiles were derived by maximizing the minimum Q-score across antagonistic weight scenarios.
-\end{enumerate}
+Dimensions are derived from a global LSA projection of all domain corpora. Consensus is solved via exact Linear Programming constrained to the theory manifold (convex hull of existing theories).
 
-\section{Results: Cross-Domain Synthesis}
-The performance of the engine across all domains is summarized in Table \ref{tab:summary}.
-
+\section{Results: Consensus Q Scores}
 \begin{table}[h]
 \centering
-\begin{tabular}{lcccc}
+\begin{tabular}{lccl}
 \toprule
-Domain & Consensus Q & Worst-case Q & Fragility & Variance Explained \\
+Domain & Q-Score & Primary Mixture & Most Robust Theory \\
 \midrule
 """
     for domain, res in domains.items():
         q = res['q_score']
-        w = res['stress']['worst_exact']
-        f = res['stress']['fragility']
-        v = sum(res['variance_explained'][:min(3, len(res['variance_explained']))]) * 100
-        latex += f"{domain.replace('_', ' ')} & {q:.4f} & {w:.4f} & {f:.4f} & {v:.1f}\\% \\\\\n"
+        mix = res['mixture']
+        # Sort mix by weight
+        sorted_mix = sorted(mix.items(), key=lambda x: -x[1])
+        mix_str = ", ".join([f"{k} ({v:.2f})" for k, v in sorted_mix[:2]])
+
+        # Find most robust theory (lowest fragility)
+        robust = res['robustness']
+        most_robust = min(robust.items(), key=lambda x: x[1]['fragility'])[0]
+
+        latex += f"{domain.replace('_', ' ')} & {q:.3f} & {mix_str} & {most_robust} \\\\\n"
 
     latex += r"""\bottomrule
 \end{tabular}
-\caption{Unified Engine Performance Metrics across Theoretical Domains}
-\label{tab:summary}
 \end{table}
 
 \section{Cross-Domain Isomorphisms}
-Our analysis identified several key structural isomorphisms where mathematical tensions in one field map directly to another:
+Correlation analysis of domain-optimal vectors in the shared LSA space reveals structural similarities:
 \begin{itemize}
 """
-    for iso in isomorphisms:
-        latex += f"\\item {iso}\n"
+    for iso in sorted(isomorphisms, key=lambda x: -abs(x['score'])):
+        d1, d2 = iso['pair']
+        latex += f"\\item {d1} $\\leftrightarrow$ {d2}: $r={iso['score']:+.3f}$\n"
 
     latex += r"""\end{itemize}
 
-\section{Analysis: Theoretical Mixtures}
-The optimal singularity is achieved through balanced theoretical mixtures:
-\begin{itemize}
+\section{Theory-Level Robustness}
+\begin{table}[h]
+\centering
+\begin{tabular}{lcccc}
+\toprule
+Theory & Worst-case Q & Mean Q & Fragility \\
+\midrule
 """
+    # Show a selection of theories across domains
+    all_robust = []
     for domain, res in domains.items():
-        mix_str = ", ".join([f"{k}: {v:.1f}" for k, v in sorted(res['mixture'].items(), key=lambda x: -x[1])[:2]])
-        latex += f"\\item \\textbf{{{domain}}}: {mix_str}\n"
+        for name, r in res['robustness'].items():
+            all_robust.append((name, r))
 
-    latex += r"""\end{itemize}
+    # Sort by mean Q descending
+    all_robust.sort(key=lambda x: -x[1]['mean'])
 
-\section{Conclusion}
-The Unified Epistemological Engine demonstrates that theoretical progress follows universal structural constraints. AGI alignment and physical unification are sub-problems of a single mathematical optimization: the balancing of the Ouroboros Kernel.
+    for name, r in all_robust[:15]:
+        latex += f"{name.replace('_', ' ')} & {r['worst_exact']:.3f} & {r['mean']:.3f} & {r['fragility']:.3f} \\\\\n"
+
+    latex += r"""\bottomrule
+\end{tabular}
+\end{table}
 
 \end{document}
 """
