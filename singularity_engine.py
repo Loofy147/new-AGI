@@ -78,13 +78,10 @@ class SingularityEngine:
 
         if np.any(weak_dims):
             print(f"Adaptive Tuning: Boosting weights for dimensions {np.where(weak_dims)[0]}")
-            # Update the weight matrix: increase weight on dimensions where profile is weak
-            for i in range(len(self.weight_matrix)):
-                self.weight_matrix[i, weak_dims] *= boost
-                # Re-normalize rows to sum to 1
-                row_sum = np.sum(self.weight_matrix[i])
-                if row_sum > 0:
-                    self.weight_matrix[i] /= row_sum
+            # ⚡ Performance Boost: Fully vectorized weight update
+            self.weight_matrix[:, weak_dims] *= boost
+            row_sums = np.sum(self.weight_matrix, axis=1, keepdims=True)
+            self.weight_matrix = np.divide(self.weight_matrix, row_sums, out=np.zeros_like(self.weight_matrix), where=row_sums!=0)
 
             # Re-optimize with new weight constraints
             return self.optimize()

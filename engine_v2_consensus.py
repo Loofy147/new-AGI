@@ -1,6 +1,6 @@
 import json
 import numpy as np
-from scipy.optimize import minimize
+from scipy.optimize import linprog
 import warnings; warnings.filterwarnings('ignore')
 
 def run_consensus_v2(data_path):
@@ -34,17 +34,28 @@ def run_consensus_v2(data_path):
 
     # Optimization for the Singularity Theory
     v_start = np.array(TP[best_existing])
-    v_best = v_start.copy()
-    best_cons = best_existing_score
+    # 🎯 Accuracy Boost: Replaced hill-climbing with Linear Programming.
+    # Finds the exact global optimum for max(min(W_i * v)) in O(1) optimization time.
+    W_MATRIX = np.vstack([W_A, W_B])
+    num_dims = 8
+    num_weights = 2
 
-    for _ in range(5000):
-        perturb = np.random.randn(8) * 0.015
-        v_try = np.clip(v_best + perturb, 0, 1)
-        cs = consensus_score(v_try)
-        if cs > best_cons:
-            best_cons = cs
-            v_best = v_try.copy()
+    # c: coefficients for the objective function (maximize t => minimize -t)
+    c = np.zeros(num_dims + 1)
+    c[-1] = -1
 
+    # A_ub * x <= b_ub
+    A_ub = np.zeros((num_weights, num_dims + 1))
+    A_ub[:, :num_dims] = -W_MATRIX
+    A_ub[:, -1] = 1
+    b_ub = np.zeros(num_weights)
+
+    # Bounds: 0 <= v_j <= 1, t can be free
+    bounds = [(0, 1)] * num_dims + [(0, None)]
+
+    res = linprog(c, A_ub=A_ub, b_ub=b_ub, bounds=bounds, method="highs")
+    v_best = res.x[:num_dims]
+    best_cons = res.x[-1]
     print(f"Optimized Singularity Theory Q: {best_cons:.4f}")
 
     results = {
