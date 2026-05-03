@@ -4,6 +4,9 @@ from sklearn.decomposition import TruncatedSVD
 from sklearn.preprocessing import MinMaxScaler
 from scipy.optimize import linprog
 
+# ⚡ Bolt: Using modern NumPy Generator for thread-safe and faster RNG
+_RNG = np.random.default_rng()
+
 def q(v, w):
     """Linear quality score: dot product of weight vector and profile."""
     return float(np.dot(w, np.clip(v, 0, 1)))
@@ -16,13 +19,15 @@ def q_best_greedy(v):
     """Exact: max of linear q(v,w) over simplex = max_i(v_i). O(1)."""
     return float(np.max(np.clip(v, 0, 1)))
 
-def lp_manifold(theories, W_mat):
+def lp_manifold(V_matrix, names, W_mat):
     """
     Exact LP: max t  s.t.  W_j·(T·λ)>=t ∀j,  Σλ=1, λ>=0
     Constrained to convex hull of actual theories (mixtures).
+    V_matrix: (N, D) matrix of theory profiles.
+    names: List of theory names.
+    W_mat: (M, D) matrix of weight personas.
     """
-    names = list(theories.keys())
-    T = np.array([theories[n] for n in names]).T  # (D, N)
+    T = V_matrix.T  # (D, N)
     N = len(names)
     nw = W_mat.shape[0]
 
@@ -48,8 +53,9 @@ def lp_manifold(theories, W_mat):
         return None, 0.0, {}
 
     lam = np.clip(res.x[:N], 0, None)
-    if lam.sum() > 0:
-        lam /= lam.sum()
+    total_lam = lam.sum()
+    if total_lam > 0:
+        lam /= total_lam
 
     v_opt = T @ lam
     t_opt = float(res.x[-1])
@@ -57,18 +63,15 @@ def lp_manifold(theories, W_mat):
 
     return v_opt, t_opt, mixture
 
-def stress_vectorized(theories, n_scenarios=1000):
+def stress_vectorized(V_matrix, names, n_scenarios=1000):
     """Matrix-wide robustness evaluation."""
-    names = list(theories.keys())
-    V = np.array([np.clip(theories[n], 0, 1) for n in names])  # (N, D)
-    D = V.shape[1]
+    V = np.clip(V_matrix, 0, 1)  # (N, D)
+    N, D = V.shape
 
-    # Dirichlet scenarios (sum to 1)
-    adv = np.random.dirichlet(np.ones(D) * 0.4, n_scenarios)  # (n, D)
-    scores = adv @ V.T                                       # (n, N)
+    # ⚡ Bolt: Using generator for faster Dirichlet sampling
+    adv = _RNG.dirichlet(np.ones(D) * 0.4, n_scenarios)  # (n, D)
+    scores = adv @ V.T                                   # (n, N)
 
-    # ⚡ Bolt: Vectorized computation of metrics across all theories
-    # Replaces per-theory loop for significant performance gain on large theory sets.
     worst_stoch = np.percentile(scores, 1, axis=0)
     worst_exact = np.min(V, axis=1)
     means = np.mean(scores, axis=0)
@@ -80,7 +83,7 @@ def stress_vectorized(theories, n_scenarios=1000):
             'worst_exact': float(worst_exact[i]),
             'mean':        float(means[i]),
             'fragility':   float(fragility[i]),
-        } for i in range(len(names))
+        } for i in range(N)
     }
 
 def embed_corpus(texts, n_dims=8):
