@@ -67,12 +67,19 @@ def stress_vectorized(theories, n_scenarios=1000):
     adv = np.random.dirichlet(np.ones(D) * 0.4, n_scenarios)  # (n, D)
     scores = adv @ V.T                                       # (n, N)
 
+    # ⚡ Bolt: Vectorized computation of metrics across all theories
+    # Replaces per-theory loop for significant performance gain on large theory sets.
+    worst_stoch = np.percentile(scores, 1, axis=0)
+    worst_exact = np.min(V, axis=1)
+    means = np.mean(scores, axis=0)
+    fragility = np.max(V, axis=1) - worst_exact
+
     return {
         names[i]: {
-            'worst_stoch': float(np.percentile(scores[:, i], 1)),
-            'worst_exact': float(np.min(V[i])),
-            'mean':        float(np.mean(scores[:, i])),
-            'fragility':   float(np.max(V[i]) - np.min(V[i])),
+            'worst_stoch': float(worst_stoch[i]),
+            'worst_exact': float(worst_exact[i]),
+            'mean':        float(means[i]),
+            'fragility':   float(fragility[i]),
         } for i in range(len(names))
     }
 
