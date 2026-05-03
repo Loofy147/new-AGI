@@ -68,6 +68,29 @@ class SingularityEngine:
 
         return v_best, best_score, best_existing
 
+    def adaptive_optimize(self, threshold=0.8, boost=1.2):
+        """
+        Self-tunes dimension weights based on profile weaknesses.
+        Integrates logic from Ouroboros Self-Optimizer for autonomous hardening.
+        """
+        v_best, best_score, best_existing = self.optimize()
+        weak_dims = v_best < threshold
+
+        if np.any(weak_dims):
+            print(f"Adaptive Tuning: Boosting weights for dimensions {np.where(weak_dims)[0]}")
+            # Update the weight matrix: increase weight on dimensions where profile is weak
+            for i in range(len(self.weight_matrix)):
+                self.weight_matrix[i, weak_dims] *= boost
+                # Re-normalize rows to sum to 1
+                row_sum = np.sum(self.weight_matrix[i])
+                if row_sum > 0:
+                    self.weight_matrix[i] /= row_sum
+
+            # Re-optimize with new weight constraints
+            return self.optimize()
+
+        return v_best, best_score, best_existing
+
     def generate_report(self, v_best, best_score, best_existing, title):
         results = {
             "dimensions": self.dims,
@@ -78,7 +101,8 @@ class SingularityEngine:
                 f"Singularity reached with exact consensus score {best_score:.4f}.",
                 f"Best baseline: {best_existing}.",
                 "Global optimum found via Linear Programming.",
-                "Mathematically guaranteed maximal theoretical profile."
+                "Mathematically guaranteed maximal theoretical profile.",
+                "Adaptive weighting enabled for theoretical hardening."
             ]
         }
 
@@ -97,7 +121,8 @@ if __name__ == "__main__":
 
     if data:
         engine = SingularityEngine(data)
-        v_best, best_score, best_existing = engine.optimize()
+        # Use adaptive optimization for maximum theoretical depth
+        v_best, best_score, best_existing = engine.adaptive_optimize()
         print(f"Cartridge: {cartridge_name}")
         print(f"Exact Singularity Score: {best_score:.4f}")
 

@@ -1,5 +1,4 @@
 import numpy as np
-from scipy.optimize import minimize
 import json
 
 def get_adversarial_w(v, n_samples=1000):
@@ -8,26 +7,14 @@ def get_adversarial_w(v, n_samples=1000):
     """
     v = np.clip(v, 0, 1)
 
-    # Objective function to minimize: dot(w, v)
-    def objective(w):
-        return np.dot(w, v)
+    # 🎯 Analytic Optimization: The minimum of a linear objective over a simplex
+    # is always at the vertex corresponding to the minimum value of v.
+    idx = np.argmin(v)
+    min_q = v[idx]
+    best_w = np.zeros(len(v))
+    best_w[idx] = 1.0
 
-    # Constraints: sum(w) == 1, 0 <= w_i <= 1
-    cons = ({'type': 'eq', 'fun': lambda w: np.sum(w) - 1})
-    bounds = [(0, 1) for _ in range(len(v))]
-
-    best_w = None
-    min_q = float('inf')
-
-    # Random restarts for global optimization
-    for _ in range(10):
-        w0 = np.random.dirichlet(np.ones(len(v)))
-        res = minimize(objective, w0, method='SLSQP', bounds=bounds, constraints=cons)
-        if res.success and res.fun < min_q:
-            min_q = res.fun
-            best_w = res.x
-
-    return min_q, best_w
+    return float(min_q), best_w
 
 def run_stress_test(theories, n_samples=1000):
     results = {}

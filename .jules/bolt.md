@@ -9,3 +9,15 @@
 ## 2025-05-15 - [LP for Theoretical Optimization]
 **Learning:** For theoretical profile optimization (maximizing the minimum score across weight vectors), hill-climbing and even vectorized perturbations often get stuck in local optima or fail to reach the true boundary (e.g., reaching 0.97 when 1.00 is possible). Linear Programming (LP) using the minimax formulation provides the exact global optimum in a single pass.
 **Action:** When the objective is to maximize the minimum of multiple linear dot products, use a minimax LP formulation instead of iterative stochastic search.
+
+## 2025-05-15 - [Exact Global Optimum for AGI Language AST]
+**Learning:** Stochastic search (hill-climbing) for AGI Language configuration is highly inefficient and inaccurate, requiring 8000+ iterations to reach near-optimum. Formulating the "Singularity Kernel" as a minimax Linear Programming problem using `scipy.optimize.linprog` (HiGHS solver) provides the exact global optimum instantly.
+**Action:** Replace iterative perturbation loops with LP formulations whenever the objective and constraints are linear.
+
+## 2025-05-15 - [Analytic Solver for Adversarial Simplex Minimization]
+**Learning:** Finding the worst-case weight vector (minimizing $v \cdot w$ where $\sum w_i = 1$) is a trivial analytic problem. Numerical optimizers like SLSQP with multiple restarts are redundant. The global minimum is always found at the vertex corresponding to $\min(v)$.
+**Action:** Use `np.argmin` for exact adversarial stress-testing over standard simplices to eliminate numerical noise and approximation overhead.
+
+## 2025-05-15 - [Adaptive Weighting for Autonomous Hardening]
+**Learning:** Static theoretical models are vulnerable to specific dimension failures. Integrating an adaptive weighting loop that identifies and boosts weak dimensions allows the engine to autonomously "harden" theory profiles, leading to more robust scientific consensus.
+**Action:** Implement `adaptive_optimize` patterns to allow systems to self-correct theoretical imbalances during the optimization phase.

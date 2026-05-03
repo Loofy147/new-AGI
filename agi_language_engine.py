@@ -4,6 +4,7 @@ EPISTEMOLOGICAL ENGINE: AGI CODING LANGUAGE DOMAIN
 Resolving the architectural tension between Deep Learning Scaling,
 Self-Modifying Code, and Provable AI Alignment.
 """
+from scipy.optimize import linprog
 import numpy as np
 from itertools import combinations
 import warnings; warnings.filterwarnings('ignore')
@@ -92,19 +93,28 @@ for name, v in tops:
     print(f"  {name:35s}  {comp:>11.4f}  {friction:>8.2f}")
 
 # ── PARETO CONSENSUS (The Perfect AGI Compiler) ──────────────────────────
-print("\n  3. THE SINGULARITY KERNEL (Minimax Paradigm Consensus)")
-print("  Optimizing an AST that satisfies both Scaling constraints AND Alignment bounds...")
+# 🎯 Accuracy Boost: Replaced hill-climbing with Linear Programming.
+# Finds the exact global optimum for max(min(W_i * v)) in O(1) optimization time.
+W_MATRIX = np.vstack([W_scale, W_align])
+num_dims = len(DL)
+num_weights = W_MATRIX.shape[0]
 
-v_best = tops[0][1].copy()
-best_cons = min(q(v_best, W_scale), q(v_best, W_align))
+# c: coefficients for the objective function (maximize t => minimize -t)
+c = np.zeros(num_dims + 1)
+c[-1] = -1
 
-for _ in range(8000):
-    perturb = np.random.randn(8) * 0.02
-    v_try = np.clip(v_best + perturb, 0, 1)
-    cs = min(q(v_try, W_scale), q(v_try, W_align))
-    if cs > best_cons:
-        best_cons = cs
-        v_best = v_try.copy()
+# A_ub * x <= b_ub
+A_ub = np.zeros((num_weights, num_dims + 1))
+A_ub[:, :num_dims] = -W_MATRIX
+A_ub[:, -1] = 1
+b_ub = np.zeros(num_weights)
+
+# Bounds: 0 <= v_j <= 1, t can be free
+bounds = [(0, 1)] * num_dims + [(0, None)]
+
+res = linprog(c, A_ub=A_ub, b_ub=b_ub, bounds=bounds, method="highs")
+v_best = res.x[:num_dims]
+best_cons = res.x[-1]
 
 print(f"\n  Maximal theoretical consensus reached: Q = {best_cons:.4f}")
 print("  To write safe, recursive self-improving AGI, the language MUST map to:\n")
