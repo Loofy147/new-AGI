@@ -1,12 +1,15 @@
 import json
+import os
 
 def generate_latex(data_path, output_path):
+    if not os.path.exists(data_path):
+        print(f"Error: {data_path} not found.")
+        return
+
     with open(data_path, 'r') as f:
         results = json.load(f)
 
     isomorphisms = results.get("isomorphisms", [])
-
-    # Filter out metadata keys for domain processing
     domains = {k: v for k, v in results.items() if k != "isomorphisms"}
 
     latex = r"""\documentclass{article}
@@ -54,7 +57,7 @@ Domain & Consensus Q & Worst-case Q & Fragility & Variance Explained \\
         q = res['q_score']
         w = res['stress']['exact_worst']
         f = res['stress']['fragility']
-        v = sum(res['variance_explained'][:3]) * 100
+        v = sum(res['variance_explained'][:min(3, len(res['variance_explained']))]) * 100
         latex += f"{domain.replace('_', ' ')} & {q:.4f} & {w:.4f} & {f:.4f} & {v:.1f}\\% \\\\\n"
 
     latex += r"""\bottomrule
@@ -88,9 +91,10 @@ The Unified Epistemological Engine demonstrates that theoretical progress follow
 \end{document}
 """
 
+    os.makedirs(os.path.dirname(output_path), exist_ok=True) if os.path.dirname(output_path) else None
     with open(output_path, 'w') as f:
         f.write(latex)
     print(f"Unified LaTeX preprint written to {output_path}")
 
 if __name__ == "__main__":
-    generate_latex('unified_results.json', 'unified_preprint.tex')
+    generate_latex('results/unified_results.json', 'results/unified_preprint.tex')

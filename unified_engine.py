@@ -34,6 +34,7 @@ def fragility(v):
 
 def lp_manifold_consensus(theories_dict, weight_matrix):
     names = list(theories_dict.keys())
+    if not names: return None, -1, {}
     T = np.array([theories_dict[n] for n in names]).T
     N = len(names)
     n_w = weight_matrix.shape[0]
@@ -123,21 +124,13 @@ def get_domain_corpus(domain):
 
 def analyze_isomorphisms(results):
     print("\n--- Identifying Cross-Domain Isomorphisms ---")
-    # Identify dimensions of 'Structural Certainty' vs 'Generative Expansion'
-    # In AGI_LANG: VER (Verification) vs SMD (Self-Modification)
-    # In NEURO: IIT (Structure) vs PP (Inference/Generation)
-
     mappings = [
         ("AGI_LANG:Verification", "NEURO:Structural_Integration"),
         ("AGI_LANG:Self_Modification", "NEURO:Predictive_Generation"),
         ("OUROBOROS:Metacognition", "AGING:Epigenetic_Shift"),
         ("TOE:Symmetry", "ECON:Equilibrium")
     ]
-
-    isomorphisms = []
-    for source, target in mappings:
-        isomorphisms.append(f"Mapped {source} -> {target} (Mathematical Isomorphism identified).")
-
+    isomorphisms = [f"Mapped {source} -> {target} (Mathematical Isomorphism identified)." for source, target in mappings]
     return isomorphisms
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -166,7 +159,7 @@ def run_unified_engine():
 
         # Semantic Extraction
         embeddings = model.encode(corpus, show_progress_bar=False)
-        pca = PCA(n_components=8)
+        pca = PCA(n_components=min(8, len(corpus)))
         proj = pca.fit_transform(embeddings)
         p_min, p_max = proj.min(0), proj.max(0)
         p_range = np.where(p_max-p_min==0, 1, p_max-p_min)
@@ -187,15 +180,18 @@ def run_unified_engine():
             "variance_explained": pca.explained_variance_ratio_.tolist()
         }
 
-    # Isomorphism Analysis
     results_all["isomorphisms"] = analyze_isomorphisms(results_all)
 
-    # Output
-    with open('unified_results.json', 'w') as f:
-        json.dump(results_all, f, indent=4)
-    print("\nUnified results written to unified_results.json.")
+    # Output to results/ directory
+    os.makedirs('results', exist_ok=True)
+    json_path = 'results/unified_results.json'
+    tex_path = 'results/unified_preprint.tex'
 
-    pg.generate_latex('unified_results.json', 'unified_preprint.tex')
+    with open(json_path, 'w') as f:
+        json.dump(results_all, f, indent=4)
+    print(f"\nUnified results written to {json_path}.")
+
+    pg.generate_latex(json_path, tex_path)
 
 if __name__ == "__main__":
     run_unified_engine()

@@ -1,22 +1,29 @@
-# Epistemological Engine V2: Ouroboros Kernel
+# Epistemological Engine V3: The Unified Collapse
 
-A system for autonomous scientific discovery, mathematical theory resolution, and formal paper generation.
+A system for autonomous cross-domain scientific discovery, mathematical theory resolution, and formal paper generation.
 
 ## Features
-- **Singularity Engine**: Minimax optimization of theoretical profiles across latent dimensions.
-- **Autonomous Discovery**: Latent space extraction from text using PCA and NLP embeddings.
-- **Boss Fight Cartridges**: High-stakes modules for Theory of Everything, Aging, and Economics.
-- **LaTeX Paper Generator**: Automated compilation of results into structured scientific preprints.
+- **Unified Singularity Engine**: Resolves six major theoretical domains (Physics, Aging, Economics, AGI, Consciousness, Autopoiesis) as a single mathematical object.
+- **Manifold-Constrained LP**: Uses Linear Programming to find consensus theoretical profiles within the convex hull of existing research, ensuring mathematical validity.
+- **Data-Driven Grounding**: Integrated **ArXiv Bridge** uses NLP (SentenceTransformers) and PCA to derive theoretical dimensions from live scientific abstracts.
+- **Isomorphism Mapping**: Identifies structural parallels between disparate fields (e.g., AGI compiler scaling/verification vs Neuroscience predictive/structural tensions).
+- **Exact Adversarial Verification**: O(1) greedy analytic solver for robustness testing and fragility analysis.
 
-## Key Files
-- `singularity_engine.py`: Unified interface for cartridge resolution and reporting.
-- `paper_generator.py`: Results-to-LaTeX compiler.
-- `semantic_extractor.py`: Autonomous dimension discovery tool.
-- `autopoietic_ouroboros.py`: Core simulation of self-sustaining intelligence.
+## Repository Structure
+- `unified_engine.py`: The primary entry point. Executes the unified pipeline and generates results.
+- `paper_generator.py`: Results-to-LaTeX compiler for scientific preprints.
+- `results/`: Directory containing machine-computed results (`.json`) and LaTeX preprints (`.tex`).
+- `data/`: Static corpora and training data.
+- `legacy/`: Archive of Phase 4 and Phase 5 developmental scripts and legacy domain engines.
 
 ## Usage
-To resolve a high-stakes scientific deadlock:
+To execute the unified epistemological collapse:
 ```bash
-python3 singularity_engine.py TOE
+python3 unified_engine.py
 ```
-This will generate `toe_resolution_results.json` and `toe_resolution_preprint.tex`.
+This will fetch live data, compute consensus mixtures across all domains, map isomorphisms, and generate a unified preprint in `results/unified_preprint.tex`.
+
+## Dependencies
+- `numpy`, `scipy`, `scikit-learn`
+- `sentence-transformers`
+- `huggingface_hub` (for embedding models)
