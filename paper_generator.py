@@ -55,7 +55,7 @@ Domain & Consensus Q & Worst-case Q & Fragility & Variance Explained \\
 """
     for domain, res in domains.items():
         q = res['q_score']
-        w = res['stress']['exact_worst']
+        w = res['stress']['worst_exact']
         f = res['stress']['fragility']
         v = sum(res['variance_explained'][:min(3, len(res['variance_explained']))]) * 100
         latex += f"{domain.replace('_', ' ')} & {q:.4f} & {w:.4f} & {f:.4f} & {v:.1f}\\% \\\\\n"
