@@ -89,7 +89,8 @@
                 "mean": 0.4789986158714267,
                 "fragility": 0.8434337382123664
             }
-        }
+        },
+        "variance_explained": null
     },
     "TOE": {
         "v_opt": [
@@ -156,7 +157,8 @@
                 "mean": 0.5126654041864381,
                 "fragility": 0.423054229328405
             }
-        }
+        },
+        "variance_explained": null
     },
     "AGING": {
         "v_opt": [
@@ -222,7 +224,8 @@
                 "mean": 0.46228089248013055,
                 "fragility": 0.7969901133336941
             }
-        }
+        },
+        "variance_explained": null
     },
     "ECON": {
         "v_opt": [
@@ -289,7 +292,8 @@
                 "mean": 0.5481577699201666,
                 "fragility": 0.6393436784345937
             }
-        }
+        },
+        "variance_explained": null
     },
     "AGI_LANG": {
         "v_opt": [
@@ -355,7 +359,8 @@
                 "mean": 0.47620343420674505,
                 "fragility": 0.7282038059118663
             }
-        }
+        },
+        "variance_explained": null
     },
     "OUROBOROS": {
         "v_opt": [
@@ -422,7 +427,8 @@
                 "mean": 0.417806995691036,
                 "fragility": 0.49559330033677107
             }
-        }
+        },
+        "variance_explained": null
     },
     "isomorphisms": [
         {
@@ -430,105 +436,120 @@
                 "CONSCIOUSNESS",
                 "TOE"
             ],
-            "score": -0.6428571428571429
+            "score": -0.6428571428571429,
+            "significant": true
         },
         {
             "pair": [
                 "CONSCIOUSNESS",
                 "AGING"
             ],
-            "score": 0.09523809523809526
+            "score": 0.09523809523809526,
+            "significant": false
         },
         {
             "pair": [
                 "CONSCIOUSNESS",
                 "ECON"
             ],
-            "score": -0.5476190476190477
+            "score": -0.5476190476190477,
+            "significant": false
         },
         {
             "pair": [
                 "CONSCIOUSNESS",
                 "AGI_LANG"
             ],
-            "score": -0.11904761904761905
+            "score": -0.11904761904761905,
+            "significant": false
         },
         {
             "pair": [
                 "CONSCIOUSNESS",
                 "OUROBOROS"
             ],
-            "score": 0.6904761904761906
+            "score": 0.6904761904761906,
+            "significant": true
         },
         {
             "pair": [
                 "TOE",
                 "AGING"
             ],
-            "score": -0.4047619047619048
+            "score": -0.4047619047619048,
+            "significant": false
         },
         {
             "pair": [
                 "TOE",
                 "ECON"
             ],
-            "score": 0.6904761904761906
+            "score": 0.6904761904761906,
+            "significant": true
         },
         {
             "pair": [
                 "TOE",
                 "AGI_LANG"
             ],
-            "score": 0.0
+            "score": 0.0,
+            "significant": false
         },
         {
             "pair": [
                 "TOE",
                 "OUROBOROS"
             ],
-            "score": -0.5000000000000001
+            "score": -0.5000000000000001,
+            "significant": false
         },
         {
             "pair": [
                 "AGING",
                 "ECON"
             ],
-            "score": -0.09523809523809526
+            "score": -0.09523809523809526,
+            "significant": false
         },
         {
             "pair": [
                 "AGING",
                 "AGI_LANG"
             ],
-            "score": 0.04761904761904763
+            "score": 0.04761904761904763,
+            "significant": false
         },
         {
             "pair": [
                 "AGING",
                 "OUROBOROS"
             ],
-            "score": -0.3333333333333334
+            "score": -0.3333333333333334,
+            "significant": false
         },
         {
             "pair": [
                 "ECON",
                 "AGI_LANG"
             ],
-            "score": -0.38095238095238104
+            "score": -0.38095238095238104,
+            "significant": false
         },
         {
             "pair": [
                 "ECON",
                 "OUROBOROS"
             ],
-            "score": -0.6666666666666669
+            "score": -0.6666666666666669,
+            "significant": true
         },
         {
             "pair": [
                 "AGI_LANG",
                 "OUROBOROS"
             ],
-            "score": 0.11904761904761905
+            "score": 0.11904761904761905,
+            "significant": false
         }
     ]
 }

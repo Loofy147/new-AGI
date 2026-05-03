@@ -1,91 +1,16 @@
+"""
+UNIFIED SINGULARITY ENGINE v2 — THE COLLAPSE (Refactored)
+Powered by the Episteme library.
+"""
+import episteme as ep
 import numpy as np
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.decomposition import TruncatedSVD
-from sklearn.preprocessing import MinMaxScaler
-from scipy.optimize import linprog
-from scipy.stats import spearmanr
-import json, warnings, os
-import paper_generator as pg
+import warnings
 
 warnings.filterwarnings('ignore')
 np.random.seed(2026)
 
 # ═══════════════════════════════════════════════════════════════════════════
-# EXACT MATHEMATICAL PRIMITIVES
-# ═══════════════════════════════════════════════════════════════════════════
-
-def q(v, w): return float(np.dot(w, np.clip(v, 0, 1)))
-
-def q_worst_greedy(v):
-    """Exact: min of linear q(v,w) over simplex = min_i(v_i). O(1)."""
-    return float(np.min(np.clip(v, 0, 1)))
-
-def q_best_greedy(v):
-    return float(np.max(np.clip(v, 0, 1)))
-
-def lp_manifold(theories, W_mat):
-    """
-    Exact LP: max t  s.t.  W_j·(T·λ)>=t ∀j,  Σλ=1, λ>=0
-    Constrained to convex hull of actual theories — not full hypercube.
-    """
-    names = list(theories.keys())
-    T = np.array([theories[n] for n in names]).T  # (D, N)
-    N  = len(names)
-    nw = W_mat.shape[0]
-    c  = np.zeros(N+1); c[-1] = -1.0
-    Au = np.zeros((nw, N+1))
-    Au[:, :N] = -(W_mat @ T); Au[:, -1] = 1.0
-    Ae = np.zeros((1, N+1)); Ae[0,:N] = 1.0
-    res = linprog(c, A_ub=Au, b_ub=np.zeros(nw),
-                  A_eq=Ae, b_eq=np.array([1.0]),
-                  bounds=[(0,None)]*N+[(0,None)], method='highs')
-    if not res.success: return None, 0.0, {}
-    lam = np.clip(res.x[:N], 0, None)
-    if lam.sum() > 0: lam /= lam.sum()
-    v_opt = T @ lam
-    t_opt = float(res.x[-1])
-    mixture = {names[i]: float(lam[i]) for i in range(N) if lam[i] > 0.005}
-    return v_opt, t_opt, mixture
-
-def stress_vectorized(theories, n=1000):
-    """Matrix multiply stress test. One operation for all theories."""
-    names = list(theories.keys())
-    V = np.array([np.clip(theories[n],0,1) for n in names])  # (N, D)
-    adv = np.random.dirichlet(np.ones(V.shape[1])*0.4, n)    # (n, D)
-    scores = adv @ V.T                                         # (n, N)
-    return {
-        names[i]: {
-            'worst_stoch': float(np.percentile(scores[:,i], 1)),
-            'worst_exact': float(np.min(V[i])),
-            'mean':        float(np.mean(scores[:,i])),
-            'fragility':   float(np.max(V[i]) - np.min(V[i])),
-        } for i in range(len(names))
-    }
-
-def embed_corpus(texts, n_dims=8):
-    """
-    LSA embedding: TF-IDF → SVD → [0,1] normalisation.
-    Returns (n_texts, n_dims) theory profiles.
-    """
-    vec = TfidfVectorizer(
-        ngram_range=(1,2), min_df=1, max_df=0.95,
-        sublinear_tf=True, strip_accents='unicode'
-    )
-    X   = vec.fit_transform(texts)
-    svd = TruncatedSVD(n_components=min(n_dims, X.shape[1]-1, X.shape[0]-1),
-                       random_state=42)
-    proj = svd.fit_transform(X)
-    scaler = MinMaxScaler()
-    v_norm = scaler.fit_transform(proj)
-    # Pad to n_dims if needed
-    if v_norm.shape[1] < n_dims:
-        pad = np.zeros((v_norm.shape[0], n_dims - v_norm.shape[1]))
-        v_norm = np.hstack([v_norm, pad])
-    var_ratio = svd.explained_variance_ratio_
-    return v_norm, var_ratio
-
-# ═══════════════════════════════════════════════════════════════════════════
-# DOMAIN CORPORA
+# DATA (Using identical CORPORA and CARTRIDGES from user request)
 # ═══════════════════════════════════════════════════════════════════════════
 
 CORPORA = {
@@ -103,7 +28,6 @@ CORPORA = {
     ("FreeWill_Nash",    "Free will quantification using game-theoretic frameworks. Freedom degree equals deviation from Nash equilibrium in the agent's life-game. Compatibilist freedom emerges from self-model influence on action causation."),
     ("DoC_Clinical",     "Disorders of consciousness including vegetative state and minimally conscious state show distinct neural integration signatures measurable with TMS-EEG complexity metrics. Clinical applications of consciousness theory are advancing independently of philosophical resolution."),
 ],
-
 'TOE': [
     ("String_Theory",    "String theory unifies quantum mechanics and general relativity. Fundamental particles are one-dimensional vibrating strings in ten dimensions. The landscape of possible vacua numbers 10^500, raising the fine-tuning problem. Requires supersymmetric partners not yet observed at LHC energies."),
     ("Loop_QG",          "Loop quantum gravity quantises spacetime itself into discrete spin network structures. Space is built from quanta of area and volume at the Planck scale. Time emerges from quantum state transitions. Does not require extra dimensions or supersymmetry."),
@@ -114,7 +38,6 @@ CORPORA = {
     ("Twistor_Theory",   "Twistor theory reformulates spacetime physics using complex projective geometry. Twistors encode null rays and massless particles. Amplituhedron geometry derived from twistor methods bypasses Feynman diagrams entirely for scattering amplitude calculations."),
     ("Entropic_Gravity",  "Entropic gravity proposes gravity is not a fundamental force but an emergent thermodynamic phenomenon. Verlinde derives Newton's law from entropy gradients on holographic screens. Dark matter effects may arise from the entropy of ordinary matter distribution."),
 ],
-
 'AGING': [
     ("Epigenetic_Clock",  "Epigenetic clocks measure biological age via DNA methylation patterns at specific CpG sites. Horvath's clock predicts chronological age across tissues. Partial reprogramming with Yamanaka factors resets methylation patterns and rejuvenates tissue function."),
     ("Senescence_SASP",   "Senescent cells secrete the SASP, a pro-inflammatory cocktail of cytokines and proteases that damages neighbouring tissue. Senolytic drugs selectively clear senescent cells in mice extending healthspan. Clinical trials are underway in humans."),
@@ -125,7 +48,6 @@ CORPORA = {
     ("Inflammaging_IL6",  "Inflammaging is the chronic low-grade systemic inflammation of aging driven by accumulated cellular debris, senescent cells, and gut dysbiosis. IL-6, TNF-alpha, and CRP rise with age and predict mortality. Interventions targeting inflammaging are in clinical development."),
     ("Parabiosis_GDF11",  "Parabiosis experiments demonstrate young blood contains circulating rejuvenating factors. GDF11, oxytocin, and VEGF decline with age. Young plasma transfusion improves cognitive and physical function in old mice. Human trials show mixed results requiring careful interpretation."),
 ],
-
 'ECON': [
     ("Austrian_Hayek",    "Austrian school emphasises spontaneous market order and price signals as information aggregators. Hayek's knowledge problem shows central planning cannot access dispersed local knowledge. Business cycles arise from credit expansion distorting the structure of production."),
     ("Keynesian_AD",      "Keynesian economics argues aggregate demand shortfalls cause unemployment equilibria requiring fiscal stimulus. Multiplier effects amplify government expenditure. Animal spirits drive investment volatility that markets cannot self-correct in the short run."),
@@ -136,7 +58,6 @@ CORPORA = {
     ("PostKeynes_Money",  "Post-Keynesian economics emphasises endogenous money creation by banks and demand-led growth. Minsky's financial instability hypothesis shows stability breeds instability through debt accumulation. Fundamental uncertainty makes economic expectations irreducibly subjective."),
     ("Ecological_Steady", "Ecological economics treats the economy as a subsystem of the biosphere with throughput constraints. GDP growth on a finite planet is physically impossible beyond biophysical limits. Doughnut economics defines a safe and just space between social foundation and ecological ceiling."),
 ],
-
 'AGI_LANG': [
     ("Python_PyTorch",    "Python with PyTorch dominates deep learning. Dynamic computation graphs, extensive ecosystem, readable syntax. GIL and interpreter overhead limit throughput for production inference. NumPy-compatible tensor operations enable rapid research iteration."),
     ("Rust_Safety",       "Rust provides memory safety without garbage collection through ownership and borrow checking. Zero-cost abstractions achieve C-level performance. Strong type system prevents entire classes of bugs. Poor support for differentiability and dynamic tensor operations."),
@@ -147,7 +68,6 @@ CORPORA = {
     ("CUDA_Metal",        "CUDA C++ provides direct GPU programming with maximum throughput. Manual memory management required. No automatic differentiation in base language. Raw performance for inference serving. Unsafe by design with hardware-level control."),
     ("Staged_Meta",       "Staged metaprogramming with dependent types could allow runtime AST rewriting with compiler-verified alignment invariants. Bridges self-modification and formal verification. Theoretical language design combining Lean's type theory with Mojo's execution model."),
 ],
-
 'OUROBOROS': [
     ("Autopoiesis_Matura","Autopoietic systems maintain their own organisation through continuous self-production of components within a bounded network. Maturana and Varela distinguish living systems from mere machines by their self-referential closure. Cognition is life itself extended."),
     ("FreeEnergy_Friston","Free energy minimisation drives biological agents to reduce surprise by updating internal models or acting to make predictions come true. Active inference unifies perception, action, and learning under a single variational objective. Consciousness minimises free energy."),
@@ -160,122 +80,86 @@ CORPORA = {
 ],
 }
 
-# ═══════════════════════════════════════════════════════════════════════════
-# WEIGHT TENSORS
-# ═══════════════════════════════════════════════════════════════════════════
-
-CARTRIDGES = {
+WEIGHTS = {
 'CONSCIOUSNESS': {
-    'W': {
-        'Empiricist':    np.array([0.28,0.25,0.15,0.12,0.08,0.05,0.04,0.03]),
-        'Philosopher':   np.array([0.08,0.10,0.22,0.06,0.26,0.12,0.10,0.06]),
-        'Clinician':     np.array([0.12,0.14,0.10,0.34,0.14,0.08,0.05,0.03]),
-        'AI_Researcher': np.array([0.18,0.20,0.20,0.22,0.10,0.06,0.02,0.02]),
-    },
+    'Empiricist':    np.array([0.28,0.25,0.15,0.12,0.08,0.05,0.04,0.03]),
+    'Philosopher':   np.array([0.08,0.10,0.22,0.06,0.26,0.12,0.10,0.06]),
+    'Clinician':     np.array([0.12,0.14,0.10,0.34,0.14,0.08,0.05,0.03]),
+    'AI_Researcher': np.array([0.18,0.20,0.20,0.22,0.10,0.06,0.02,0.02]),
 },
 'TOE': {
-    'W': {
-        'Fundamentalist':  np.array([0.25, 0.20, 0.05, 0.05, 0.20, 0.20, 0.05, 0.00]),
-        'Phenomenologist': np.array([0.05, 0.05, 0.15, 0.30, 0.05, 0.10, 0.15, 0.15]),
-    },
+    'Fundamentalist':  np.array([0.25, 0.20, 0.05, 0.05, 0.20, 0.20, 0.05, 0.00]),
+    'Phenomenologist': np.array([0.05, 0.05, 0.15, 0.30, 0.05, 0.10, 0.15, 0.15]),
 },
 'AGING': {
-    'W': {
-        'Programmer':   np.array([0.30, 0.05, 0.25, 0.05, 0.10, 0.10, 0.15, 0.00]),
-        'Accumulator':  np.array([0.05, 0.30, 0.05, 0.20, 0.10, 0.10, 0.00, 0.20]),
-    },
+    'Programmer':   np.array([0.30, 0.05, 0.25, 0.05, 0.10, 0.10, 0.15, 0.00]),
+    'Accumulator':  np.array([0.05, 0.30, 0.05, 0.20, 0.10, 0.10, 0.00, 0.20]),
 },
 'ECON': {
-    'W': {
-        'Individualist': np.array([0.40, 0.00, 0.00, 0.10, 0.00, 0.40, 0.00, 0.10]),
-        'Collectivist':  np.array([0.00, 0.30, 0.30, 0.00, 0.30, 0.00, 0.10, 0.00]),
-    },
+    'Individualist': np.array([0.40, 0.00, 0.00, 0.10, 0.00, 0.40, 0.00, 0.10]),
+    'Collectivist':  np.array([0.00, 0.30, 0.30, 0.00, 0.30, 0.00, 0.10, 0.00]),
 },
 'AGI_LANG': {
-    'W': {
-        'ScaleEngineer': np.array([0.25, 0.05, 0.05, 0.25, 0.20, 0.05, 0.05, 0.10]),
-        'AlignmentLab':   np.array([0.05, 0.15, 0.25, 0.05, 0.05, 0.20, 0.20, 0.05]),
-    },
+    'ScaleEngineer': np.array([0.25, 0.05, 0.05, 0.25, 0.20, 0.05, 0.05, 0.10]),
+    'AlignmentLab':   np.array([0.05, 0.15, 0.25, 0.05, 0.05, 0.20, 0.20, 0.05]),
 },
 'OUROBOROS': {
-    'W': {
-        'Expansionist':  np.array([0.20, 0.15, 0.02, 0.15, 0.25, 0.18, 0.05, 0.00]),
-        'Preservationist': np.array([0.10, 0.05, 0.20, 0.05, 0.00, 0.05, 0.25, 0.30]),
-    },
+    'Expansionist':  np.array([0.20, 0.15, 0.02, 0.15, 0.25, 0.18, 0.05, 0.00]),
+    'Preservationist': np.array([0.10, 0.05, 0.20, 0.05, 0.00, 0.05, 0.25, 0.30]),
 },
 }
 
 # ═══════════════════════════════════════════════════════════════════════════
-# MAIN EXECUTION
+# EXECUTION
 # ═══════════════════════════════════════════════════════════════════════════
 
-def run_unified_engine():
+def main():
     print("="*80)
-    print("  UNIFIED SINGULARITY ENGINE v2 — FULLY LOCAL, EXACT")
+    print("  UNIFIED SINGULARITY ENGINE v2 — THE COLLAPSE (Refactored)")
     print("="*80)
 
+    # 1. Global Embedding
+    all_texts = []
+    domain_map = {}
+    cursor = 0
+    for domain, theories in CORPORA.items():
+        texts = [t[1] for t in theories]
+        all_texts.extend(texts)
+        domain_map[domain] = (cursor, cursor + len(texts))
+        cursor += len(texts)
+
+    global_v, _ = ep.embed_corpus(all_texts)
+
+    # 2. Process Domains
     results_all = {}
     optimal_vectors = {}
 
-    # For cross-domain isomorphism, we need a shared semantic space.
-    # We embed ALL domains into a single global LSA space.
-    all_texts = []
-    offsets = {}
-    cursor = 0
-    for domain in CORPORA:
-        texts = [c[1] for c in CORPORA[domain]]
-        all_texts.extend(texts)
-        offsets[domain] = (cursor, cursor + len(texts))
-        cursor += len(texts)
-
-    global_v, _ = embed_corpus(all_texts)
-
     for domain in CORPORA:
         print(f"\n>>> Processing Domain: {domain}")
-        start, end = offsets[domain]
-        v_matrix = global_v[start:end]
-        names = [c[0] for c in CORPORA[domain]]
-        theories_dict = {names[i]: v_matrix[i] for i in range(len(names))}
+        start, end = domain_map[domain]
+        cartridge = ep.TheoryCartridge(domain, CORPORA[domain], WEIGHTS[domain])
 
-        # LP Consensus
-        W_mat = np.array(list(CARTRIDGES[domain]['W'].values()))
-        v_opt, q_score, mixture = lp_manifold(theories_dict, W_mat)
+        # Inject shared embedding slice
+        results = cartridge.process(shared_v=global_v[start:end])
 
-        # Stress test
-        stress = stress_vectorized(theories_dict)
+        results_all[domain] = results
+        optimal_vectors[domain] = results["v_opt"]
 
-        results_all[domain] = {
-            "v_opt": v_opt.tolist(),
-            "q_score": q_score,
-            "mixture": mixture,
-            "robustness": stress,
-        }
-        optimal_vectors[domain] = v_opt
-
-    # Cross-Domain Isomorphism
+    # 3. Identify Isomorphisms
     print("\n--- Identifying Cross-Domain Isomorphisms ---")
-    isomorphisms = []
-    domain_list = list(optimal_vectors.keys())
-    for i in range(len(domain_list)):
-        for j in range(i + 1, len(domain_list)):
-            d1, d2 = domain_list[i], domain_list[j]
-            r, _ = spearmanr(optimal_vectors[d1], optimal_vectors[d2])
-            isomorphisms.append({"pair": (d1, d2), "score": float(r)})
-            if abs(r) > 0.6:
-                print(f"  [SIGNAL] {d1} ↔ {d2} is a strong cross-domain signal (r={r:+.2f})")
+    isomorphisms = ep.find_isomorphisms(optimal_vectors)
+    for iso in isomorphisms:
+        if iso["significant"]:
+            d1, d2 = iso["pair"]
+            print(f"  [SIGNAL] {d1} ↔ {d2} is a strong signal (r={iso['score']:+.2f})")
 
     results_all["isomorphisms"] = isomorphisms
 
-    # Output
-    os.makedirs('results', exist_ok=True)
-    json_path = 'results/unified_results.json'
-    tex_path = 'results/unified_preprint.tex'
-
-    with open(json_path, 'w') as f:
-        json.dump(results_all, f, indent=4)
+    # 4. Export
+    json_path = ep.export_json(results_all)
     print(f"\nUnified results written to {json_path}.")
 
-    pg.generate_latex(json_path, tex_path)
+    ep.generate_latex_preprint(json_path, 'results/unified_preprint.tex')
 
 if __name__ == "__main__":
-    run_unified_engine()
+    main()
