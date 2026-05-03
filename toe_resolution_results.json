@@ -25,6 +25,7 @@
         "Singularity reached with exact consensus score 1.0000.",
         "Best baseline: Twistor_Theory.",
         "Global optimum found via Linear Programming.",
-        "Mathematically guaranteed maximal theoretical profile."
+        "Mathematically guaranteed maximal theoretical profile.",
+        "Adaptive weighting enabled for theoretical hardening."
     ]
 }

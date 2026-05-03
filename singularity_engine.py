@@ -68,6 +68,26 @@ class SingularityEngine:
 
         return v_best, best_score, best_existing
 
+    def adaptive_optimize(self, threshold=0.8, boost=1.2):
+        """
+        Self-tunes dimension weights based on profile weaknesses.
+        Integrates logic from Ouroboros Self-Optimizer for autonomous hardening.
+        """
+        v_best, best_score, best_existing = self.optimize()
+        weak_dims = v_best < threshold
+
+        if np.any(weak_dims):
+            print(f"Adaptive Tuning: Boosting weights for dimensions {np.where(weak_dims)[0]}")
+            # ⚡ Performance Boost: Fully vectorized weight update
+            self.weight_matrix[:, weak_dims] *= boost
+            row_sums = np.sum(self.weight_matrix, axis=1, keepdims=True)
+            self.weight_matrix = np.divide(self.weight_matrix, row_sums, out=np.zeros_like(self.weight_matrix), where=row_sums!=0)
+
+            # Re-optimize with new weight constraints
+            return self.optimize()
+
+        return v_best, best_score, best_existing
+
     def generate_report(self, v_best, best_score, best_existing, title):
         results = {
             "dimensions": self.dims,
@@ -78,7 +98,8 @@ class SingularityEngine:
                 f"Singularity reached with exact consensus score {best_score:.4f}.",
                 f"Best baseline: {best_existing}.",
                 "Global optimum found via Linear Programming.",
-                "Mathematically guaranteed maximal theoretical profile."
+                "Mathematically guaranteed maximal theoretical profile.",
+                "Adaptive weighting enabled for theoretical hardening."
             ]
         }
 
@@ -97,7 +118,8 @@ if __name__ == "__main__":
 
     if data:
         engine = SingularityEngine(data)
-        v_best, best_score, best_existing = engine.optimize()
+        # Use adaptive optimization for maximum theoretical depth
+        v_best, best_score, best_existing = engine.adaptive_optimize()
         print(f"Cartridge: {cartridge_name}")
         print(f"Exact Singularity Score: {best_score:.4f}")
 

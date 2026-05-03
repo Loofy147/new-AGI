@@ -25,6 +25,7 @@
         "Singularity reached with exact consensus score 1.0000.",
         "Best baseline: Gaia_Cyber_Organism.",
         "Global optimum found via Linear Programming.",
-        "Mathematically guaranteed maximal theoretical profile."
+        "Mathematically guaranteed maximal theoretical profile.",
+        "Adaptive weighting enabled for theoretical hardening."
     ]
 }

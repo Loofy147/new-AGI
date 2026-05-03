@@ -1,14 +1,12 @@
 """
 PHASE 5: SUPREME SYNTHESIS & TEMPORAL EVOLUTION
 ================================================
-5A: Massively Adversarial stress-test (1000 scenarios)
-5D: 5-way Supreme Synthesis
+5A: Massively Adversarial stress-test (Analytic)
+5D: 5-way Supreme Synthesis (Vectorized)
 5F: Temporal W(t) Evolution
 """
 import numpy as np
-from scipy.optimize import minimize, linprog, curve_fit
-from scipy import linalg
-from itertools import combinations
+from scipy.optimize import linprog
 import json, warnings; warnings.filterwarnings('ignore')
 np.random.seed(2026)
 
@@ -34,25 +32,24 @@ TP = {
 
 # ── 5D: 5-WAY SUPREME SYNTHESIS ───────────────────────────────────────────
 print("\n── 5D: 5-WAY SUPREME SYNTHESIS ─────────────────────────────────────────")
-best_5way = None; max_q = -1
 # Taking top 5 by individual Q_corpus score
 top_5_names = sorted(TP.keys(), key=lambda n: q(TP[n]))[:5]
-v_5way = np.max([TP[n] for n in top_5_names], axis=0)
+# Vectorized max across profiles
+v_5way = np.max(np.stack([TP[n] for n in top_5_names]), axis=0)
 v_5way = np.clip(v_5way * 1.01, 0, 1) # Synergistic boost
 TP['5WAY_Supreme'] = v_5way
 print(f"  5-way Supreme Q(corpus): {q(v_5way):.4f}")
 
 # ── 5A: MASSIVELY ADVERSARIAL STRESS-TEST ───────────────────────────────
-print("\n── 5A: MASSIVELY ADVERSARIAL STRESS-TEST (n=1000) ────────────────────")
-# ⚡ Optimization: Vectorized stress test for 1000 scenarios
-adv_pool = np.random.dirichlet(np.ones(8)*0.6, size=1000)
+print("\n── 5A: MASSIVELY ADVERSARIAL STRESS-TEST (Analytic) ──────────────────")
+# 🎯 Analytic Optimization: The absolute worst-case Q across any weight simplex
+# is exactly the minimum dimension value of the theory profile.
 for name, v in TP.items():
-    worst_q = np.min(np.dot(adv_pool, np.clip(v,0,1)))
-    print(f"  {name:14s} | Worst-case Q: {worst_q:.4f}")
+    worst_q = np.min(np.clip(v, 0, 1))
+    print(f"  {name:14s} | Analytic Worst-case Q: {worst_q:.4f}")
 
 # ── 5F: TEMPORAL W(t) EVOLUTION ─────────────────────────────────────────
 print("\n── 5F: TEMPORAL W(t) EVOLUTION (W_corpus -> W_survey) ─────────────────")
-# Simulating how the best theory performs as scientific consensus shifts
 timesteps = 10
 v_top = TP['5WAY_Supreme']
 print(f"  {'T-Step':>6} | {'Consensus Shift':>15} | {'Q_Score':>8}")
