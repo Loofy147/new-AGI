@@ -1,0 +1,15 @@
+[project]
+name = "episteme"
+version = "0.1.0"
+description = "Epistemological Engine for Manifold-Constrained Consensus and Theory Robustness"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "scipy",
+    "scikit-learn",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
