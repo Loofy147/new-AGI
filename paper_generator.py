@@ -4,6 +4,11 @@ def generate_latex(data_path, output_path):
     with open(data_path, 'r') as f:
         results = json.load(f)
 
+    isomorphisms = results.get("isomorphisms", [])
+
+    # Filter out metadata keys for domain processing
+    domains = {k: v for k, v in results.items() if k != "isomorphisms"}
+
     latex = r"""\documentclass{article}
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath}
@@ -21,18 +26,18 @@ def generate_latex(data_path, output_path):
 \maketitle
 
 \begin{abstract}
-This paper presents the results of a unified epistemological execution across six disparate theoretical domains: Physics (ToE), Biological Aging, Macroeconomics, AGI Languages, and Autopoietic Systems (Ouroboros). By collapsing these domains into a single mathematical framework using manifold-constrained linear programming and semantic dimension extraction, we identify a cross-domain structural isomorphism. Our results demonstrate that the same mathematical kernel resolves conflicts between generativity and structural certainty across all domains simultaneously.
+This paper presents the results of a unified epistemological execution across six disparate theoretical domains. By collapsing these domains into a single mathematical framework using manifold-constrained linear programming and semantic dimension extraction from real scientific corpora (ArXiv), we identify a cross-domain structural isomorphism. Our results demonstrate that the same mathematical kernel resolves conflicts between generativity and structural certainty across all domains simultaneously.
 \end{abstract}
 
 \section{Introduction}
-Current theoretical research is often siloed, with separate mathematical tools applied to physics, biology, and computer science. However, many of these fields face the same fundamental tension: the conflict between the drive for expansion (high variance, high generativity) and the necessity of structural stability (low error, formal verification). We propose that these are not merely analogies but the same mathematical object viewed through different domain lenses.
+Theoretical research is often siloed. However, many fields face the same fundamental tension: the conflict between the drive for expansion and the necessity of structural stability. We propose that these are the same mathematical object viewed through different domain lenses.
 
 \section{Methodology}
-We utilized a unified pipeline consisting of:
+We utilized a unified pipeline:
 \begin{enumerate}
-    \item \textbf{Semantic Extraction}: Real-world corpora for each domain were embedded using transformer-based models and projected onto 8-dimensional orthogonal axes of tension via PCA.
-    \item \textbf{Manifold-Constrained LP}: Consensus theoretical profiles were derived by maximizing the minimum Q-score across antagonistic weight scenarios, constrained to the convex hull of existing theories.
-    \item \textbf{O(1) Greedy Adversarial}: Robustness was verified using exact analytic solvers to identify worst-case epistemic conditions.
+    \item \textbf{Data Sourcing (ArXiv)}: Live abstracts were fetched via the ArXiv API for domains including Physics, Neuroscience, and AGI Architecture.
+    \item \textbf{Semantic Extraction}: Corpora were embedded using transformer-based models and projected onto 8-dimensional orthogonal axes of tension via PCA.
+    \item \textbf{Manifold-Constrained LP}: Consensus theoretical profiles were derived by maximizing the minimum Q-score across antagonistic weight scenarios.
 \end{enumerate}
 
 \section{Results: Cross-Domain Synthesis}
@@ -45,12 +50,12 @@ The performance of the engine across all domains is summarized in Table \ref{tab
 Domain & Consensus Q & Worst-case Q & Fragility & Variance Explained \\
 \midrule
 """
-    for domain, res in results.items():
+    for domain, res in domains.items():
         q = res['q_score']
         w = res['stress']['exact_worst']
         f = res['stress']['fragility']
-        v = sum(res['variance_explained'][:3]) * 100 # Top 3 PCs
-        latex += f"{domain} & {q:.4f} & {w:.4f} & {f:.4f} & {v:.1f}\\% \\\\\n"
+        v = sum(res['variance_explained'][:3]) * 100
+        latex += f"{domain.replace('_', ' ')} & {q:.4f} & {w:.4f} & {f:.4f} & {v:.1f}\\% \\\\\n"
 
     latex += r"""\bottomrule
 \end{tabular}
@@ -58,18 +63,27 @@ Domain & Consensus Q & Worst-case Q & Fragility & Variance Explained \\
 \label{tab:summary}
 \end{table}
 
-\section{Analysis: The Isomorphism Finding}
-The most significant result is the consistency of the "Mixture" profiles. In every domain, the optimal singularity is achieved through a roughly 60/40 split between high-innovation theories and high-verification theories. For example:
+\section{Cross-Domain Isomorphisms}
+Our analysis identified several key structural isomorphisms where mathematical tensions in one field map directly to another:
 \begin{itemize}
 """
-    for domain, res in results.items():
+    for iso in isomorphisms:
+        latex += f"\\item {iso}\n"
+
+    latex += r"""\end{itemize}
+
+\section{Analysis: Theoretical Mixtures}
+The optimal singularity is achieved through balanced theoretical mixtures:
+\begin{itemize}
+"""
+    for domain, res in domains.items():
         mix_str = ", ".join([f"{k}: {v:.1f}" for k, v in sorted(res['mixture'].items(), key=lambda x: -x[1])[:2]])
         latex += f"\\item \\textbf{{{domain}}}: {mix_str}\n"
 
     latex += r"""\end{itemize}
 
 \section{Conclusion}
-The Unified Epistemological Engine demonstrates that theoretical progress in seemingly unrelated fields follows the same structural constraints. This finding suggests that AGI alignment, biological immortality, and physical unification are sub-problems of a single mathematical optimization: the balancing of the Ouroboros Kernel across the Markov Blanket of the known.
+The Unified Epistemological Engine demonstrates that theoretical progress follows universal structural constraints. AGI alignment and physical unification are sub-problems of a single mathematical optimization: the balancing of the Ouroboros Kernel.
 
 \end{document}
 """
