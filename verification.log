@@ -1,0 +1,52 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+================================================================================
+  UNIFIED SINGULARITY ENGINE V3: THE COLLAPSE
+================================================================================
+
+>>> Processing Domain: CONSCIOUSNESS
+  Embedding 15 texts for CONSCIOUSNESS...
+Loading weights:   0%|          | 0/103 [00:00<?, ?it/s]Loading weights: 100%|██████████| 103/103 [00:00<00:00, 1329.19it/s]
+    Consensus Q: 0.5283
+    Exact Worst: 0.3199
+    Mixture: {'Theory_4': 0.01900384943381549, 'Theory_6': 0.49856708905720676, 'Theory_12': 0.4824290615089778}
+
+>>> Processing Domain: TOE
+  Embedding 15 texts for TOE...
+Loading weights:   0%|          | 0/103 [00:00<?, ?it/s]Loading weights: 100%|██████████| 103/103 [00:00<00:00, 1749.91it/s]
+    Consensus Q: 0.6260
+    Exact Worst: 0.1425
+    Mixture: {'Theory_11': 1.0}
+
+>>> Processing Domain: AGING
+  Embedding 15 texts for AGING...
+Loading weights:   0%|          | 0/103 [00:00<?, ?it/s]Loading weights: 100%|██████████| 103/103 [00:00<00:00, 1319.22it/s]
+    Consensus Q: 0.6317
+    Exact Worst: 0.3840
+    Mixture: {'Theory_2': 0.1820628265972644, 'Theory_8': 0.2850957580569937, 'Theory_14': 0.5328414153457419}
+
+>>> Processing Domain: ECON
+  Embedding 15 texts for ECON...
+Loading weights:   0%|          | 0/103 [00:00<?, ?it/s]Loading weights: 100%|██████████| 103/103 [00:00<00:00, 1425.26it/s]
+    Consensus Q: 0.6419
+    Exact Worst: 0.3061
+    Mixture: {'Theory_4': 0.15990710461455301, 'Theory_9': 0.840092895385447}
+
+>>> Processing Domain: AGI_LANG
+  Embedding 15 texts for AGI_LANG...
+Loading weights:   0%|          | 0/103 [00:00<?, ?it/s]Loading weights: 100%|██████████| 103/103 [00:00<00:00, 1256.93it/s]
+    Consensus Q: 0.6828
+    Exact Worst: 0.3950
+    Mixture: {'Theory_5': 0.08120163090837874, 'Theory_6': 0.9187983690916213}
+
+>>> Processing Domain: OUROBOROS
+  Embedding 15 texts for OUROBOROS...
+Loading weights:   0%|          | 0/103 [00:00<?, ?it/s]Loading weights: 100%|██████████| 103/103 [00:00<00:00, 1514.23it/s]
+    Consensus Q: 0.6456
+    Exact Worst: 0.3524
+    Mixture: {'Theory_5': 0.4081321966033456, 'Theory_13': 0.5918678033966543}
+
+================================================================================
+  FINAL AGGREGATION & CROSS-CARTRIRE ISOMORPHISM
+================================================================================
+Unified results written to unified_results.json.
+Unified LaTeX preprint written to unified_preprint.tex

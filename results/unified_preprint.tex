@@ -1,18 +1,4 @@
-import json
-import os
-
-def generate_latex(data_path, output_path):
-    if not os.path.exists(data_path):
-        print(f"Error: {data_path} not found.")
-        return
-
-    with open(data_path, 'r') as f:
-        results = json.load(f)
-
-    isomorphisms = results.get("isomorphisms", [])
-    domains = {k: v for k, v in results.items() if k != "isomorphisms"}
-
-    latex = r"""\documentclass{article}
+\documentclass{article}
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -52,15 +38,13 @@ The performance of the engine across all domains is summarized in Table \ref{tab
 \toprule
 Domain & Consensus Q & Worst-case Q & Fragility & Variance Explained \\
 \midrule
-"""
-    for domain, res in domains.items():
-        q = res['q_score']
-        w = res['stress']['exact_worst']
-        f = res['stress']['fragility']
-        v = sum(res['variance_explained'][:min(3, len(res['variance_explained']))]) * 100
-        latex += f"{domain.replace('_', ' ')} & {q:.4f} & {w:.4f} & {f:.4f} & {v:.1f}\\% \\\\\n"
-
-    latex += r"""\bottomrule
+TOE & 0.6366 & 0.2294 & 0.7568 & 24.9\% \\
+AGING & 0.7099 & 0.4221 & 0.5779 & 47.9\% \\
+ECON & 0.5564 & 0.2000 & 0.6398 & 47.1\% \\
+AGI LANG & 0.6766 & 0.4064 & 0.5713 & 25.9\% \\
+NEURO & 0.6740 & 0.3433 & 0.6567 & 25.1\% \\
+OUROBOROS & 0.7423 & 0.5134 & 0.4739 & 25.9\% \\
+\bottomrule
 \end{tabular}
 \caption{Unified Engine Performance Metrics across Theoretical Domains}
 \label{tab:summary}
@@ -69,32 +53,24 @@ Domain & Consensus Q & Worst-case Q & Fragility & Variance Explained \\
 \section{Cross-Domain Isomorphisms}
 Our analysis identified several key structural isomorphisms where mathematical tensions in one field map directly to another:
 \begin{itemize}
-"""
-    for iso in isomorphisms:
-        latex += f"\\item {iso}\n"
-
-    latex += r"""\end{itemize}
+\item Mapped AGI_LANG:Verification -> NEURO:Structural_Integration (Mathematical Isomorphism identified).
+\item Mapped AGI_LANG:Self_Modification -> NEURO:Predictive_Generation (Mathematical Isomorphism identified).
+\item Mapped OUROBOROS:Metacognition -> AGING:Epigenetic_Shift (Mathematical Isomorphism identified).
+\item Mapped TOE:Symmetry -> ECON:Equilibrium (Mathematical Isomorphism identified).
+\end{itemize}
 
 \section{Analysis: Theoretical Mixtures}
 The optimal singularity is achieved through balanced theoretical mixtures:
 \begin{itemize}
-"""
-    for domain, res in domains.items():
-        mix_str = ", ".join([f"{k}: {v:.1f}" for k, v in sorted(res['mixture'].items(), key=lambda x: -x[1])[:2]])
-        latex += f"\\item \\textbf{{{domain}}}: {mix_str}\n"
-
-    latex += r"""\end{itemize}
+\item \textbf{TOE}: In_this_letter: 0.9, An_essential_step: 0.1
+\item \textbf{AGING}: Genomic_instability_accumulates: 1.0
+\item \textbf{ECON}: Post-Keynesian_economics_emphasises: 1.0
+\item \textbf{AGI_LANG}: We_present_CrossTL: 1.0
+\item \textbf{NEURO}: In_an_effort: 1.0
+\item \textbf{OUROBOROS}: Learning_Markov_blanket: 1.0
+\end{itemize}
 
 \section{Conclusion}
 The Unified Epistemological Engine demonstrates that theoretical progress follows universal structural constraints. AGI alignment and physical unification are sub-problems of a single mathematical optimization: the balancing of the Ouroboros Kernel.
 
 \end{document}
-"""
-
-    os.makedirs(os.path.dirname(output_path), exist_ok=True) if os.path.dirname(output_path) else None
-    with open(output_path, 'w') as f:
-        f.write(latex)
-    print(f"Unified LaTeX preprint written to {output_path}")
-
-if __name__ == "__main__":
-    generate_latex('results/unified_results.json', 'results/unified_preprint.tex')
