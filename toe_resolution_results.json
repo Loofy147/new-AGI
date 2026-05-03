@@ -10,22 +10,25 @@
         "DET"
     ],
     "v_best": [
+        0.8,
         1.0,
-        1.0,
-        1.0,
-        1.0,
-        1.0,
-        1.0,
-        1.0,
+        0.1,
+        0.3,
+        0.6,
+        0.6,
+        0.4,
         1.0
     ],
-    "best_score": 1.0,
-    "best_existing": "Twistor_Theory",
+    "best_score": 0.496551724137931,
+    "best_existing": "Wolfram_Physics",
+    "mixture": {
+        "Wolfram_Physics": 1.0
+    },
     "diagnostics": [
-        "Singularity reached with exact consensus score 1.0000.",
-        "Best baseline: Twistor_Theory.",
-        "Global optimum found via Linear Programming.",
-        "Mathematically guaranteed maximal theoretical profile.",
+        "Singularity reached with exact consensus score 0.4966.",
+        "Best baseline: Wolfram_Physics.",
+        "Global optimum found via Linear Programming constrained to theory manifold.",
+        "Mathematically guaranteed maximal theoretical profile within convex hull.",
         "Adaptive weighting enabled for theoretical hardening."
     ]
 }

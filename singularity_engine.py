@@ -12,6 +12,8 @@ class SingularityEngine:
         # Weights are usually dictionaries of np.arrays
         self.weight_matrix = np.array(list(self.weights.values()))
         self.TP = data['theories']
+        self.theory_names = list(self.TP.keys())
+        self.theory_matrix = np.array([self.TP[name] for name in self.theory_names])
 
     def q(self, v, w):
         return float(np.dot(w, np.clip(v, 0, 1)))
@@ -21,41 +23,59 @@ class SingularityEngine:
 
     def optimize(self, iterations=None):
         """
-        🎯 Accuracy Boost: Replaced hill-climbing with Linear Programming.
-        Finds the exact global optimum for max(min(W_i * v)) in O(1) optimization time.
+        🎯 Accuracy Boost: Fixes the degenerate LP bug.
+        Constrains the optimized profile 'v' to lie in the convex hull of existing theories.
+        Finds the exact global optimum for max(min(W_i * (Sum alpha_j * T_j)))
+        where Sum alpha_j = 1 and alpha_j >= 0.
         """
-        num_dims = len(self.dims)
+        num_theories = len(self.theory_names)
         num_weights = self.weight_matrix.shape[0]
 
-        # c: coefficients for the objective function (we want to maximize t, so minimize -t)
-        # variables are [v_1, ..., v_n, t]
-        c = np.zeros(num_dims + 1)
+        # c: coefficients for the objective function (maximize t, so minimize -t)
+        # variables are [alpha_1, ..., alpha_m, t]
+        c = np.zeros(num_theories + 1)
         c[-1] = -1
 
         # A_ub * x <= b_ub
-        # For each weight vector w_i: w_i * v >= t  =>  -w_i * v + t <= 0
-        A_ub = np.zeros((num_weights, num_dims + 1))
-        A_ub[:, :num_dims] = -self.weight_matrix
+        # For each weight vector w_i: w_i * (TheoryMatrix.T * alpha) >= t
+        # (w_i * TheoryMatrix.T) * alpha - t >= 0
+        # -(w_i * TheoryMatrix.T) * alpha + t <= 0
+
+        # Calculate impact matrix: (num_weights, num_theories)
+        # impact[i, j] = w_i . T_j
+        impact = np.dot(self.weight_matrix, self.theory_matrix.T)
+
+        A_ub = np.zeros((num_weights, num_theories + 1))
+        A_ub[:, :num_theories] = -impact
         A_ub[:, -1] = 1
         b_ub = np.zeros(num_weights)
 
-        # Bounds: 0 <= v_j <= 1, t can be free (but will be >= 0 naturally)
-        bounds = [(0, 1)] * num_dims + [(0, None)]
+        # Equality constraint: Sum alpha_j = 1
+        A_eq = np.zeros((1, num_theories + 1))
+        A_eq[0, :num_theories] = 1
+        b_eq = np.array([1])
 
-        res = linprog(c, A_ub=A_ub, b_ub=b_ub, bounds=bounds, method='highs')
+        # Bounds: 0 <= alpha_j <= 1, t >= 0
+        bounds = [(0, 1)] * num_theories + [(0, None)]
+
+        res = linprog(c, A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bounds=bounds, method='highs')
 
         if res.success:
-            v_best = res.x[:num_dims]
+            alphas = res.x[:num_theories]
             best_score = res.x[-1]
+            v_best = np.dot(alphas, self.theory_matrix)
+            mixture = {self.theory_names[i]: float(alphas[i]) for i in range(num_theories) if alphas[i] > 0.001}
         else:
-            # Fallback to current best if LP fails (unlikely for this bounded problem)
+            # Fallback to current best if LP fails
             best_score = -1
-            v_best = np.zeros(num_dims)
-            for v in self.TP.values():
+            v_best = np.zeros(len(self.dims))
+            mixture = {}
+            for name, v in self.TP.items():
                 s = self.consensus_score(v)
                 if s > best_score:
                     best_score = s
                     v_best = v.copy()
+                    mixture = {name: 1.0}
 
         # Identify best existing for baseline report
         best_existing = None
@@ -66,19 +86,17 @@ class SingularityEngine:
                 best_existing_score = score
                 best_existing = name
 
-        return v_best, best_score, best_existing
+        return v_best, best_score, best_existing, mixture
 
     def adaptive_optimize(self, threshold=0.8, boost=1.2):
         """
         Self-tunes dimension weights based on profile weaknesses.
-        Integrates logic from Ouroboros Self-Optimizer for autonomous hardening.
         """
-        v_best, best_score, best_existing = self.optimize()
+        v_best, best_score, best_existing, mixture = self.optimize()
         weak_dims = v_best < threshold
 
         if np.any(weak_dims):
             print(f"Adaptive Tuning: Boosting weights for dimensions {np.where(weak_dims)[0]}")
-            # ⚡ Performance Boost: Fully vectorized weight update
             self.weight_matrix[:, weak_dims] *= boost
             row_sums = np.sum(self.weight_matrix, axis=1, keepdims=True)
             self.weight_matrix = np.divide(self.weight_matrix, row_sums, out=np.zeros_like(self.weight_matrix), where=row_sums!=0)
@@ -86,19 +104,20 @@ class SingularityEngine:
             # Re-optimize with new weight constraints
             return self.optimize()
 
-        return v_best, best_score, best_existing
+        return v_best, best_score, best_existing, mixture
 
-    def generate_report(self, v_best, best_score, best_existing, title):
+    def generate_report(self, v_best, best_score, best_existing, mixture, title):
         results = {
             "dimensions": self.dims,
             "v_best": v_best.tolist(),
-            "best_score": best_score,
+            "best_score": float(best_score),
             "best_existing": best_existing,
+            "mixture": mixture,
             "diagnostics": [
                 f"Singularity reached with exact consensus score {best_score:.4f}.",
                 f"Best baseline: {best_existing}.",
-                "Global optimum found via Linear Programming.",
-                "Mathematically guaranteed maximal theoretical profile.",
+                "Global optimum found via Linear Programming constrained to theory manifold.",
+                "Mathematically guaranteed maximal theoretical profile within convex hull.",
                 "Adaptive weighting enabled for theoretical hardening."
             ]
         }
@@ -118,12 +137,12 @@ if __name__ == "__main__":
 
     if data:
         engine = SingularityEngine(data)
-        # Use adaptive optimization for maximum theoretical depth
-        v_best, best_score, best_existing = engine.adaptive_optimize()
+        v_best, best_score, best_existing, mixture = engine.adaptive_optimize()
         print(f"Cartridge: {cartridge_name}")
         print(f"Exact Singularity Score: {best_score:.4f}")
+        print(f"Theoretical Mixture: {mixture}")
 
-        tex_file = engine.generate_report(v_best, best_score, best_existing, f"{cartridge_name} Resolution")
+        tex_file = engine.generate_report(v_best, best_score, best_existing, mixture, f"{cartridge_name} Resolution")
         print(f"Preprint generated: {tex_file}")
     else:
         print("Invalid cartridge.")
