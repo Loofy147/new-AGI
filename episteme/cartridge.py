@@ -26,13 +26,9 @@ class TheoryCartridge:
         else:
             self.v_matrix, self.var_explained = embed_corpus(self.texts)
 
-        theories_dict = {
-            self.theory_names[i]: self.v_matrix[i]
-            for i in range(len(self.theory_names))
-        }
-
-        v_opt, q_score, mixture = lp_manifold(theories_dict, self.weights)
-        robustness = stress_vectorized(theories_dict)
+        # ⚡ Bolt: Pass V_matrix and names directly to avoid redundant allocations
+        v_opt, q_score, mixture = lp_manifold(self.v_matrix, self.theory_names, self.weights)
+        robustness = stress_vectorized(self.v_matrix, self.theory_names)
 
         self.results = {
             "v_opt": v_opt,
