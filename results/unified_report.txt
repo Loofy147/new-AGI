@@ -1,0 +1,51 @@
+╔══════════════════════════════════════════════════════════════════════════╗
+║   EPISTEMOLOGICAL ENGINE — UNIFIED RESOLUTION REPORT                   ║
+║   All values machine-computed. Zero hand-estimation.                   ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+  Domain           Consensus_Q   Tension    Deadlock  Dominant_theory
+  ──────────────  ────────────  ────────  ──────────  ─────────────────────────
+  AGI_LANG            0.432514    0.1029       YES ⚠  Julia_Dispatch (λ=1.000)
+  CONSCIOUSNESS       0.489501    0.0239          no  PP_ActiveInfer (λ=1.000)
+
+=== CONSCIOUSNESS ===
+  Consensus Q   : 0.4895
+  Tension (std) : 0.0239
+  Deadlock      : no
+  Dominant theory: PP_ActiveInfer (λ=1.000)
+  Most robust   : Thermo_Phase (frag=0.749)
+  Most fragile  : Panpsychism_Prop (frag=1.000)
+  Var explained : 0.511
+  Party scores:
+    Philosopher         : 0.5374
+    Empiricist          : 0.4895
+  Mixture:
+    λ=1.0000  PP_ActiveInfer
+
+=== AGI_LANG ===
+  Consensus Q   : 0.4325
+  Tension (std) : 0.1029
+  Deadlock      : YES ⚠
+  Dominant theory: Julia_Dispatch (λ=1.000)
+  Most robust   : Julia_Dispatch (frag=0.786)
+  Most fragile  : Erlang_Actor (frag=1.000)
+  Var explained : 0.511
+  Party scores:
+    AlignmentLab        : 0.6384
+    ScaleEngineer       : 0.4325
+  Mixture:
+    λ=1.0000  Julia_Dispatch
+
+════════════════════════════════════════════════════════════════════════════
+  CROSS-DOMAIN STRUCTURAL ISOMORPHISMS
+════════════════════════════════════════════════════════════════════════════
+
+  STRUCTURAL HUB RANKING (solutions transfer most broadly from → to others):
+    CONSCIOUSNESS   avg|r|=0.2317  █████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    AGI_LANG        avg|r|=0.2317  █████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+  EXACT PRIMITIVES USED:
+  • LP manifold consensus: O(N·D) HiGHS solver, exact global optimum
+  • Greedy adversarial:    O(D) argmin, replaces iterative SLSQP
+  • Vectorised stress:     O(N·D·S) single matmul, 1000 scenarios
+  • LSA embedding:         TF-IDF + TruncatedSVD, zero network calls
