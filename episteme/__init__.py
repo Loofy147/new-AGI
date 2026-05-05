@@ -12,8 +12,10 @@ from .report      import generate_text_report, generate_latex
 from .export      import EpistemeEncoder, export_json
 from .discovery   import ArXivFetcher, TheoryDiscoverer
 from .engine      import SingularityEngine
+from .benchmarks  import get_benchmark_cartridge, list_benchmarks
+from .autopoiesis import evolved_weights
 
-__version__ = "2.1.0"
+__version__ = "2.2.0"
 __all__ = [
     "Cartridge",
     "CartridgeResult",
@@ -26,4 +28,7 @@ __all__ = [
     "ArXivFetcher",
     "TheoryDiscoverer",
     "SingularityEngine",
+    "get_benchmark_cartridge",
+    "list_benchmarks",
+    "evolved_weights",
 ]

@@ -5,118 +5,44 @@
 
   Domain           Consensus_Q   Tension    Deadlock  Dominant_theory
   ──────────────  ────────────  ────────  ──────────  ─────────────────────────
-  AGI_LANG            0.440525    0.0650          no  Lean_Formal (λ=1.000)
-  CONSCIOUSNESS       0.479576    0.0005          no  FreeWill_Nash (λ=0.395)
-  TOE                 0.511935    0.0000          no  Entropic_Gravity (λ=0.604)
-  AGING               0.550453    0.0508          no  Inflammaging_IL6 (λ=1.000)
-  ECON                0.599885    0.0000          no  Marxist_Capital (λ=0.712)
-  OUROBOROS           0.631761    0.0000          no  MarkovBlanket_Bound (λ=0.922)
+  AGI_LANG            0.432514    0.1029       YES ⚠  Julia_Dispatch (λ=1.000)
+  CONSCIOUSNESS       0.489501    0.0239          no  PP_ActiveInfer (λ=1.000)
 
 === CONSCIOUSNESS ===
-  Consensus Q   : 0.4796
-  Tension (std) : 0.0005
+  Consensus Q   : 0.4895
+  Tension (std) : 0.0239
   Deadlock      : no
-  Dominant theory: FreeWill_Nash (λ=0.395)
-  Most robust   : Panpsychism_Prop (frag=0.405)
-  Most fragile  : HOT_MetaRep (frag=0.888)
-  Var explained : 0.161
+  Dominant theory: PP_ActiveInfer (λ=1.000)
+  Most robust   : Thermo_Phase (frag=0.749)
+  Most fragile  : Panpsychism_Prop (frag=1.000)
+  Var explained : 0.511
   Party scores:
-    AI_Researcher       : 0.4807
-    Empiricist          : 0.4796
-    Philosopher         : 0.4796
-    Clinician           : 0.4796
+    Philosopher         : 0.5374
+    Empiricist          : 0.4895
   Mixture:
-    λ=0.3950  FreeWill_Nash
-    λ=0.3903  DoC_Clinical
-    λ=0.2147  Panpsychism_Prop
-
-=== TOE ===
-  Consensus Q   : 0.5119
-  Tension (std) : 0.0000
-  Deadlock      : no
-  Dominant theory: Entropic_Gravity (λ=0.604)
-  Most robust   : String_Theory (frag=0.389)
-  Most fragile  : Loop_QG (frag=1.000)
-  Var explained : 0.161
-  Party scores:
-    Fundamentalist      : 0.5119
-    Phenomenologist     : 0.5119
-  Mixture:
-    λ=0.6045  Entropic_Gravity
-    λ=0.3955  AdS_CFT
-
-=== AGING ===
-  Consensus Q   : 0.5505
-  Tension (std) : 0.0508
-  Deadlock      : no
-  Dominant theory: Inflammaging_IL6 (λ=1.000)
-  Most robust   : mTOR_Sirtuin (frag=0.504)
-  Most fragile  : Senescence_SASP (frag=0.844)
-  Var explained : 0.161
-  Party scores:
-    Accumulator         : 0.6520
-    Programmer          : 0.5505
-  Mixture:
-    λ=1.0000  Inflammaging_IL6
-
-=== ECON ===
-  Consensus Q   : 0.5999
-  Tension (std) : 0.0000
-  Deadlock      : no
-  Dominant theory: Marxist_Capital (λ=0.712)
-  Most robust   : Austrian_Market (frag=0.447)
-  Most fragile  : Complexity_Econ (frag=0.650)
-  Var explained : 0.161
-  Party scores:
-    Individualist       : 0.5999
-    Collectivist        : 0.5999
-  Mixture:
-    λ=0.7118  Marxist_Capital
-    λ=0.2882  Complexity_Econ
+    λ=1.0000  PP_ActiveInfer
 
 === AGI_LANG ===
-  Consensus Q   : 0.4405
-  Tension (std) : 0.0650
-  Deadlock      : no
-  Dominant theory: Lean_Formal (λ=1.000)
-  Most robust   : Python_PyTorch (frag=0.667)
-  Most fragile  : Lean_Formal (frag=0.846)
-  Var explained : 0.161
+  Consensus Q   : 0.4325
+  Tension (std) : 0.1029
+  Deadlock      : YES ⚠
+  Dominant theory: Julia_Dispatch (λ=1.000)
+  Most robust   : Julia_Dispatch (frag=0.786)
+  Most fragile  : Erlang_Actor (frag=1.000)
+  Var explained : 0.511
   Party scores:
-    AlignmentLab        : 0.5705
-    ScaleEngineer       : 0.4405
+    AlignmentLab        : 0.6384
+    ScaleEngineer       : 0.4325
   Mixture:
-    λ=1.0000  Lean_Formal
-
-=== OUROBOROS ===
-  Consensus Q   : 0.6318
-  Tension (std) : 0.0000
-  Deadlock      : no
-  Dominant theory: MarkovBlanket_Bound (λ=0.922)
-  Most robust   : MarkovBlanket_Bound (frag=0.358)
-  Most fragile  : FreeEnergy_Friston (frag=1.000)
-  Var explained : 0.161
-  Party scores:
-    Preservationist     : 0.6318
-    Expansionist        : 0.6318
-  Mixture:
-    λ=0.9221  MarkovBlanket_Bound
-    λ=0.0779  Metacog_Monitor
+    λ=1.0000  Julia_Dispatch
 
 ════════════════════════════════════════════════════════════════════════════
   CROSS-DOMAIN STRUCTURAL ISOMORPHISMS
 ════════════════════════════════════════════════════════════════════════════
 
-  TOE            ↔ ECON            r=+0.6398  [      MODERATE]  ███████████████████░░░░░░░░░░░
-    Moderate overlap: partial transfer of solutions between TOE and ECON
-
   STRUCTURAL HUB RANKING (solutions transfer most broadly from → to others):
-    ECON            avg|r|=0.4890  ███████████████████░░░░░░░░░░░░░░░░░░░░░
-    OUROBOROS       avg|r|=0.3954  ███████████████░░░░░░░░░░░░░░░░░░░░░░░░░
-    CONSCIOUSNESS   avg|r|=0.3710  ██████████████░░░░░░░░░░░░░░░░░░░░░░░░░░
-    TOE             avg|r|=0.3434  █████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░
-    AGING           avg|r|=0.3304  █████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░
-    AGI_LANG        avg|r|=0.2860  ███████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    CONSCIOUSNESS   avg|r|=0.2317  █████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    AGI_LANG        avg|r|=0.2317  █████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
   EXACT PRIMITIVES USED:
   • LP manifold consensus: O(N·D) HiGHS solver, exact global optimum

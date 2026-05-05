@@ -163,3 +163,26 @@ class LSAEmbedder:
         from sklearn.decomposition import PCA
         pca = PCA(n_components=min(self.n_dims, len(texts)), random_state=self.random_state)
         return pca.fit_transform(emb)
+
+class NumericEmbedder(LSAEmbedder):
+    """
+    Embedder that bypasses text processing and returns pre-computed numeric profiles.
+    Useful for benchmarks and legacy data.
+    """
+    def __init__(self, profiles: Dict[str, np.ndarray], n_dims: int = 8):
+        super().__init__(n_dims=n_dims, use_sbert=False)
+        self.profiles_data = profiles
+        self._method = 'numeric'
+
+    def embed(self, corpus: List[Tuple[str, str]], dim_labels: Optional[List[str]] = None) -> EmbedResult:
+        # corpus names must match profiles_data keys
+        profiles = {name: self.profiles_data[name] for name, _ in corpus}
+
+        return EmbedResult(
+            profiles=profiles,
+            variance_ratio=np.ones(self.n_dims)/self.n_dims,
+            cumulative_var=1.0,
+            n_dims=self.n_dims,
+            method=self._method,
+            dim_labels=dim_labels or [f"Dim{i+1}" for i in range(self.n_dims)],
+        )
