@@ -18,6 +18,8 @@ def evolved_weights(
     Evolve persona weights based on detected weaknesses in the consensus profile.
     If a dimension in v_opt is below threshold, stakeholders increase their
     sensitivity (weight) to that dimension.
+
+    Optimized: Vectorized implementation across all parties and dimensions.
     """
     v_opt = last_result.consensus.v_opt
     weak_dims = v_opt < threshold
@@ -25,19 +27,19 @@ def evolved_weights(
     if not np.any(weak_dims):
         return current_weights
 
-    new_weights_dict = {}
-    for party, w in current_weights.items():
-        wn = w.copy()
-        for i in range(len(wn)):
-            if weak_dims[i]:
-                # If dimension is weak, increase its importance
-                if wn[i] == 0:
-                    wn[i] = 0.05
-                else:
-                    wn[i] *= (1.0 + learning_rate)
+    party_names = list(current_weights.keys())
+    W = np.array([current_weights[p] for p in party_names]) # (M, D)
 
-        # Re-normalize
-        wn /= (wn.sum() + 1e-9)
-        new_weights_dict[party] = wn
+    # weak_dims is (D,), W is (M, D)
+    # NumPy broadcasting handles the dimension-wise application
 
-    return new_weights_dict
+    zeros_mask = (W == 0) & weak_dims
+    scale_mask = (W != 0) & weak_dims
+
+    W[zeros_mask] = 0.05
+    W[scale_mask] *= (1.0 + learning_rate)
+
+    # Re-normalize each party's weight vector
+    W /= (W.sum(axis=1, keepdims=True) + 1e-9)
+
+    return {party_names[i]: W[i] for i in range(len(party_names))}

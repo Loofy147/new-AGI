@@ -5,44 +5,112 @@
 
   Domain           Consensus_Q   Tension    Deadlock  Dominant_theory
   ──────────────  ────────────  ────────  ──────────  ─────────────────────────
-  AGI_LANG            0.432514    0.1029       YES ⚠  Julia_Dispatch (λ=1.000)
-  CONSCIOUSNESS       0.489501    0.0239          no  PP_ActiveInfer (λ=1.000)
+  TOE                 0.496552    0.1009       YES ⚠  Wolfram_Physics (λ=1.000)
+  ECON                0.527510    0.0000          no  Keynesianism (λ=0.874)
+  LANGUAGE            0.571781    0.0000          no  Mojo (λ=0.594)
+  AGING               0.583044    0.0000          no  Senescence_Model (λ=0.619)
+  OUROBOROS           0.657647    0.0000          no  The_Sovereign_Singleto (λ=0.682)
+  NEURO               0.887336    0.0139          no  PP (λ=1.000)
 
-=== CONSCIOUSNESS ===
-  Consensus Q   : 0.4895
-  Tension (std) : 0.0239
-  Deadlock      : no
-  Dominant theory: PP_ActiveInfer (λ=1.000)
-  Most robust   : Thermo_Phase (frag=0.749)
-  Most fragile  : Panpsychism_Prop (frag=1.000)
-  Var explained : 0.511
-  Party scores:
-    Philosopher         : 0.5374
-    Empiricist          : 0.4895
-  Mixture:
-    λ=1.0000  PP_ActiveInfer
-
-=== AGI_LANG ===
-  Consensus Q   : 0.4325
-  Tension (std) : 0.1029
+=== TOE ===
+  Consensus Q   : 0.4966
+  Tension (std) : 0.1009
   Deadlock      : YES ⚠
-  Dominant theory: Julia_Dispatch (λ=1.000)
-  Most robust   : Julia_Dispatch (frag=0.786)
-  Most fragile  : Erlang_Actor (frag=1.000)
-  Var explained : 0.511
+  Dominant theory: Wolfram_Physics (λ=1.000)
+  Most robust   : Loop_Quantum_Grav (frag=0.800)
+  Most fragile  : String_Theory (frag=0.900)
+  Var explained : 1.000
   Party scores:
-    AlignmentLab        : 0.6384
-    ScaleEngineer       : 0.4325
+    Fundamentalists     : 0.6983
+    Phenomenologists    : 0.4966
   Mixture:
-    λ=1.0000  Julia_Dispatch
+    λ=1.0000  Wolfram_Physics
+
+=== AGING ===
+  Consensus Q   : 0.5830
+  Tension (std) : 0.0000
+  Deadlock      : no
+  Dominant theory: Senescence_Model (λ=0.619)
+  Most robust   : DNA_Damage (frag=0.700)
+  Most fragile  : Genetic_Clock (frag=0.800)
+  Var explained : 1.000
+  Party scores:
+    Programmers         : 0.5830
+    Accumulators        : 0.5830
+  Mixture:
+    λ=0.6195  Senescence_Model
+    λ=0.3805  Genetic_Clock
+
+=== ECON ===
+  Consensus Q   : 0.5275
+  Tension (std) : 0.0000
+  Deadlock      : no
+  Dominant theory: Keynesianism (λ=0.874)
+  Most robust   : Keynesianism (frag=0.800)
+  Most fragile  : Austrian_School (frag=1.000)
+  Var explained : 1.000
+  Party scores:
+    Collectivists       : 0.5275
+    Individualists      : 0.5275
+  Mixture:
+    λ=0.8739  Keynesianism
+    λ=0.1261  Austrian_School
+
+=== NEURO ===
+  Consensus Q   : 0.8873
+  Tension (std) : 0.0139
+  Deadlock      : no
+  Dominant theory: PP (λ=1.000)
+  Most robust   : PP (frag=0.109)
+  Most fragile  : IIT (frag=0.180)
+  Var explained : 1.000
+  Party scores:
+    Corpus              : 0.9151
+    Survey              : 0.8873
+  Mixture:
+    λ=1.0000  PP
+
+=== LANGUAGE ===
+  Consensus Q   : 0.5718
+  Tension (std) : 0.0000
+  Deadlock      : no
+  Dominant theory: Mojo (λ=0.594)
+  Most robust   : Mojo (frag=0.700)
+  Most fragile  : Lean/Coq (frag=1.000)
+  Var explained : 1.000
+  Party scores:
+    Scale_Engineers     : 0.5718
+    Alignment_Lab       : 0.5718
+  Mixture:
+    λ=0.5940  Mojo
+    λ=0.4060  Lean/Coq
+
+=== OUROBOROS ===
+  Consensus Q   : 0.6576
+  Tension (std) : 0.0000
+  Deadlock      : no
+  Dominant theory: The_Sovereign_Singleton (λ=0.682)
+  Most robust   : Gaia_Cyber_Organism (frag=0.700)
+  Most fragile  : The_Oracle_Mainframe (frag=1.000)
+  Var explained : 1.000
+  Party scores:
+    Preservation_Drives : 0.6576
+    Expansion_Drives    : 0.6576
+  Mixture:
+    λ=0.6817  The_Sovereign_Singleton
+    λ=0.3183  Von_Neumann_Swarm
 
 ════════════════════════════════════════════════════════════════════════════
   CROSS-DOMAIN STRUCTURAL ISOMORPHISMS
 ════════════════════════════════════════════════════════════════════════════
 
   STRUCTURAL HUB RANKING (solutions transfer most broadly from → to others):
-    CONSCIOUSNESS   avg|r|=0.2317  █████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-    AGI_LANG        avg|r|=0.2317  █████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    OUROBOROS       avg|r|=0.2638  ██████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    ECON            avg|r|=0.2580  ██████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    AGING           avg|r|=0.2392  █████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    NEURO           avg|r|=0.1990  ███████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    TOE             avg|r|=0.1888  ███████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    LANGUAGE        avg|r|=0.1874  ███████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
   EXACT PRIMITIVES USED:
   • LP manifold consensus: O(N·D) HiGHS solver, exact global optimum
