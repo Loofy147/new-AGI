@@ -1,6 +1,6 @@
 """
 UNIFIED SINGULARITY ENGINE v2 — THE COLLAPSE (Refactored)
-Powered by the Episteme library.
+Powered by the episteme package.
 """
 import episteme as ep
 import numpy as np
@@ -10,7 +10,7 @@ warnings.filterwarnings('ignore')
 np.random.seed(2026)
 
 # ═══════════════════════════════════════════════════════════════════════════
-# DATA (Using identical CORPORA and CARTRIDGES from user request)
+# DATA
 # ═══════════════════════════════════════════════════════════════════════════
 
 CORPORA = {
@@ -49,7 +49,7 @@ CORPORA = {
     ("Parabiosis_GDF11",  "Parabiosis experiments demonstrate young blood contains circulating rejuvenating factors. GDF11, oxytocin, and VEGF decline with age. Young plasma transfusion improves cognitive and physical function in old mice. Human trials show mixed results requiring careful interpretation."),
 ],
 'ECON': [
-    ("Austrian_Hayek",    "Austrian school emphasises spontaneous market order and price signals as information aggregators. Hayek's knowledge problem shows central planning cannot access dispersed local knowledge. Business cycles arise from credit expansion distorting the structure of production."),
+    ("Austrian_Market",   "Austrian school emphasises spontaneous market order and price signals as information aggregators. Hayek's knowledge problem shows central planning cannot access dispersed local knowledge. Business cycles arise from credit expansion distorting the structure of production."),
     ("Keynesian_AD",      "Keynesian economics argues aggregate demand shortfalls cause unemployment equilibria requiring fiscal stimulus. Multiplier effects amplify government expenditure. Animal spirits drive investment volatility that markets cannot self-correct in the short run."),
     ("Marxist_Capital",   "Marxist political economy analyses surplus value extraction through class relations. Capitalism's internal contradictions include the tendency of the profit rate to fall and periodic overproduction crises. Labour is the sole source of value in commodity production."),
     ("MMT_Sovereign",     "Modern Monetary Theory holds currency-issuing governments face no solvency constraint. Taxes destroy money; spending creates it. Inflation not debt is the binding constraint. A job guarantee provides price stability through buffer stock employment."),
@@ -115,51 +115,31 @@ WEIGHTS = {
 
 def main():
     print("="*80)
-    print("  UNIFIED SINGULARITY ENGINE v2 — THE COLLAPSE (Refactored)")
+    print("  UNIFIED SINGULARITY ENGINE v2.1 — THE COLLAPSE (Orchestrated)")
     print("="*80)
 
-    # 1. Global Embedding
-    all_texts = []
-    domain_map = {}
-    cursor = 0
-    for domain, theories in CORPORA.items():
-        texts = [t[1] for t in theories]
-        all_texts.extend(texts)
-        domain_map[domain] = (cursor, cursor + len(texts))
-        cursor += len(texts)
-
-    global_v, _ = ep.embed_corpus(all_texts)
-
-    # 2. Process Domains
-    results_all = {}
-    optimal_vectors = {}
+    engine = ep.SingularityEngine(n_dims=8, use_sbert=False)
 
     for domain in CORPORA:
-        print(f"\n>>> Processing Domain: {domain}")
-        start, end = domain_map[domain]
-        cartridge = ep.TheoryCartridge(domain, CORPORA[domain], WEIGHTS[domain])
+        print(f"  Adding Cartridge: {domain}")
+        engine.add_cartridge(domain, CORPORA[domain], WEIGHTS[domain])
 
-        # Inject shared embedding slice
-        results = cartridge.process(shared_v=global_v[start:end])
+    print("\n  [RUNNING FULL PIPELINE...]")
+    engine.run(fit_globally=True)
 
-        results_all[domain] = results
-        optimal_vectors[domain] = results["v_opt"]
+    print("\n  [CROSS-DOMAIN SIGNAL DETECTION]")
+    for iso in engine.isomorphisms:
+        print(f"    {iso}")
 
-    # 3. Identify Isomorphisms
-    print("\n--- Identifying Cross-Domain Isomorphisms ---")
-    isomorphisms = ep.find_isomorphisms(optimal_vectors)
-    for iso in isomorphisms:
-        if iso["significant"]:
-            d1, d2 = iso["pair"]
-            print(f"  [SIGNAL] {d1} ↔ {d2} is a strong signal (r={iso['score']:+.2f})")
+    print("\n  [GENERATING REPORTS]")
+    paths = engine.export()
+    print(f"    Text:  {paths['report']}")
+    print(f"    LaTeX: {paths['latex']}")
+    print(f"    JSON:  {paths['json']}")
 
-    results_all["isomorphisms"] = isomorphisms
-
-    # 4. Export
-    json_path = ep.export_json(results_all)
-    print(f"\nUnified results written to {json_path}.")
-
-    ep.generate_latex_preprint(json_path, 'results/unified_preprint.tex')
+    print("\n" + "="*80)
+    print("  RESOLUTION COMPLETE.")
+    print("="*80)
 
 if __name__ == "__main__":
     main()

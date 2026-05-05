@@ -1,10 +1,10 @@
 """
-epistem.embed
-=============
+episteme.embed
+==============
 Local, zero-network text embedding via TF-IDF + Latent Semantic Analysis.
 Converts any domain corpus into normalized [0,1] theory profiles.
 
-Optionally upgrades to sentence-transformers when available.
+Supports global space fitting for cross-domain isomorphism consistency.
 """
 from __future__ import annotations
 import numpy as np
@@ -45,22 +45,6 @@ class EmbedResult:
 class LSAEmbedder:
     """
     Embeds a corpus of (name, text) pairs into normalized theory profiles.
-
-    Pipeline:
-      TF-IDF (bigrams, sublinear TF) → TruncatedSVD (LSA) → MinMaxScaler
-
-    The SVD axes capture latent semantic dimensions — effectively discovering
-    the principal axes of theoretical variation from text without supervision.
-
-    Parameters
-    ----------
-    n_dims : int
-        Number of latent dimensions (default 8, matching Q-score framework)
-    use_sbert : bool
-        If True and sentence-transformers is available, upgrade to MiniLM-L6.
-        Falls back to LSA automatically if not installed.
-    ngram_range : tuple
-        TF-IDF n-gram range (default (1,2) for unigrams + bigrams)
     """
 
     def __init__(
@@ -77,6 +61,16 @@ class LSAEmbedder:
         self._sbert_model = None
         self._method      = 'lsa'
 
+        # LSA State
+        self._tfidf = TfidfVectorizer(
+            ngram_range=self.ngram_range,
+            min_df=1, max_df=0.95,
+            sublinear_tf=True, strip_accents='unicode',
+        )
+        self._svd = TruncatedSVD(n_components=n_dims, random_state=random_state)
+        self._scaler = MinMaxScaler()
+        self._is_fitted = False
+
         if use_sbert:
             try:
                 from sentence_transformers import SentenceTransformer
@@ -85,23 +79,33 @@ class LSAEmbedder:
             except ImportError:
                 pass
 
+    def fit(self, corpus: List[Tuple[str, str]]) -> LSAEmbedder:
+        """Learns the latent semantic space from a global corpus."""
+        texts = [item[1] for item in corpus]
+        if self._method == 'sbert':
+             from sklearn.decomposition import PCA
+             emb = self._sbert_model.encode(texts, show_progress_bar=False)
+             self._pca = PCA(n_components=self.n_dims, random_state=self.random_state)
+             self._pca.fit(emb)
+        else:
+            X = self._tfidf.fit_transform(texts)
+            # Adjust n_components if corpus is too small
+            n_comp = min(self.n_dims, X.shape[1] - 1, X.shape[0] - 1)
+            if n_comp < self.n_dims:
+                self._svd = TruncatedSVD(n_components=n_comp, random_state=self.random_state)
+
+            proj = self._svd.fit_transform(X)
+            self._scaler.fit(proj)
+
+        self._is_fitted = True
+        return self
+
     def embed(
         self,
         corpus: List[Tuple[str, str]],
         dim_labels: Optional[List[str]] = None,
     ) -> EmbedResult:
-        """
-        Embed a list of (name, text) pairs.
-
-        Parameters
-        ----------
-        corpus : list of (theory_name, description_text) tuples
-        dim_labels : optional semantic labels for each dimension
-
-        Returns
-        -------
-        EmbedResult with profiles, variance ratios, and metadata
-        """
+        """Embed a list of (name, text) pairs."""
         names = [item[0] for item in corpus]
         texts = [item[1] for item in corpus]
         n     = len(corpus)
@@ -112,8 +116,9 @@ class LSAEmbedder:
             raw = self._embed_lsa(texts)
 
         # Normalize to [0,1] per dimension
-        scaler   = MinMaxScaler()
-        v_norm   = scaler.fit_transform(raw)
+        v_norm = self._scaler.transform(raw) if self._is_fitted else MinMaxScaler().fit_transform(raw)
+
+        # Ensure correct dimensionality
         if v_norm.shape[1] < self.n_dims:
             pad    = np.zeros((n, self.n_dims - v_norm.shape[1]))
             v_norm = np.hstack([v_norm, pad])
@@ -121,13 +126,13 @@ class LSAEmbedder:
 
         profiles = {names[i]: v_norm[i] for i in range(n)}
 
-        # Heuristic dim labels if not supplied
         if dim_labels is None:
             dim_labels = [f"PC{i+1}" for i in range(self.n_dims)]
 
-        # Variance explained
-        var_ratio = getattr(self, '_last_var_ratio',
-                            np.ones(self.n_dims)/self.n_dims)
+        if self._method == 'sbert':
+            var_ratio = self._pca.explained_variance_ratio_ if self._is_fitted else np.ones(self.n_dims)/self.n_dims
+        else:
+            var_ratio = self._svd.explained_variance_ratio_ if self._is_fitted else np.ones(self.n_dims)/self.n_dims
 
         return EmbedResult(
             profiles=profiles,
@@ -139,26 +144,22 @@ class LSAEmbedder:
         )
 
     def _embed_lsa(self, texts: List[str]) -> np.ndarray:
-        n_components = min(self.n_dims, len(texts)-1)
-        vec = TfidfVectorizer(
-            ngram_range=self.ngram_range,
-            min_df=1, max_df=0.95,
-            sublinear_tf=True, strip_accents='unicode',
-        )
-        X   = vec.fit_transform(texts)
-        svd = TruncatedSVD(n_components=n_components,
-                           random_state=self.random_state)
-        proj = svd.fit_transform(X)
-        self._last_var_ratio = np.pad(
-            svd.explained_variance_ratio_,
-            (0, self.n_dims - len(svd.explained_variance_ratio_))
-        )
-        return proj
+        if self._is_fitted:
+            X = self._tfidf.transform(texts)
+            return self._svd.transform(X)
+
+        # Local fallback
+        X = self._tfidf.fit_transform(texts)
+        n_comp = min(self.n_dims, X.shape[1] - 1, X.shape[0] - 1)
+        svd = TruncatedSVD(n_components=n_comp, random_state=self.random_state)
+        return svd.fit_transform(X)
 
     def _embed_sbert(self, texts: List[str]) -> np.ndarray:
-        from sklearn.decomposition import PCA
         emb = self._sbert_model.encode(texts, show_progress_bar=False)
-        pca = PCA(n_components=self.n_dims, random_state=self.random_state)
-        proj = pca.fit_transform(emb)
-        self._last_var_ratio = pca.explained_variance_ratio_
-        return proj
+        if self._is_fitted:
+            return self._pca.transform(emb)
+
+        # Local fallback
+        from sklearn.decomposition import PCA
+        pca = PCA(n_components=min(self.n_dims, len(texts)), random_state=self.random_state)
+        return pca.fit_transform(emb)
