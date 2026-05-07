@@ -29,16 +29,24 @@ class SingularityEngine:
 
     def run(self, fit_globally: bool = True):
         """Runs resolution for all cartridges."""
-        # Only fit if not a numeric embedder and fitting requested
+        # ⚡ Optimization: Only fit if there's a non-placeholder corpus and embedder supports it
         if fit_globally and not isinstance(self.embedder, NumericEmbedder):
             global_corpus = []
             for c in self.cartridges:
-                global_corpus.extend(c.corpus)
+                # Skip cartridges that use NumericEmbedder as they don't contribute to semantic space
+                if not isinstance(c.embedder, NumericEmbedder):
+                    # Only add if it's not a placeholder benchmark text
+                    valid_text = [item for item in c.corpus if "Pre-computed benchmark" not in item[1]]
+                    global_corpus.extend(valid_text)
+
             if global_corpus:
                 try:
                     self.embedder.fit(global_corpus)
                 except Exception as e:
                     print(f"  Warning: Global embedding fit failed ({e}). Using local fallback.")
+            else:
+                # If all cartridges are numeric or placeholder, we don't fit globally
+                pass
 
         self.results = []
         for c in self.cartridges:

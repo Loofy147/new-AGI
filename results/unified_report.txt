@@ -10,7 +10,7 @@
   LANGUAGE            0.571781    0.0000          no  Mojo (λ=0.594)
   AGING               0.583044    0.0000          no  Senescence_Model (λ=0.619)
   OUROBOROS           0.657647    0.0000          no  The_Sovereign_Singleto (λ=0.682)
-  NEURO               0.887336    0.0139          no  PP (λ=1.000)
+  NEURO               0.944003    0.0159          no  4WAY_Grand (λ=1.000)
 
 === TOE ===
   Consensus Q   : 0.4966
@@ -57,25 +57,25 @@
     λ=0.1261  Austrian_School
 
 === NEURO ===
-  Consensus Q   : 0.8873
-  Tension (std) : 0.0139
+  Consensus Q   : 0.9440
+  Tension (std) : 0.0159
   Deadlock      : no
-  Dominant theory: PP (λ=1.000)
+  Dominant theory: 4WAY_Grand (λ=1.000)
   Most robust   : PP (frag=0.109)
-  Most fragile  : IIT (frag=0.180)
+  Most fragile  : IRT_Latent (frag=0.440)
   Var explained : 1.000
   Party scores:
-    Corpus              : 0.9151
-    Survey              : 0.8873
+    Corpus              : 0.9758
+    Survey              : 0.9440
   Mixture:
-    λ=1.0000  PP
+    λ=1.0000  4WAY_Grand
 
 === LANGUAGE ===
   Consensus Q   : 0.5718
   Tension (std) : 0.0000
   Deadlock      : no
   Dominant theory: Mojo (λ=0.594)
-  Most robust   : Mojo (frag=0.700)
+  Most robust   : Julia (frag=0.600)
   Most fragile  : Lean/Coq (frag=1.000)
   Var explained : 1.000
   Party scores:
@@ -105,12 +105,12 @@
 ════════════════════════════════════════════════════════════════════════════
 
   STRUCTURAL HUB RANKING (solutions transfer most broadly from → to others):
-    OUROBOROS       avg|r|=0.2638  ██████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-    ECON            avg|r|=0.2580  ██████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-    AGING           avg|r|=0.2392  █████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-    NEURO           avg|r|=0.1990  ███████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-    TOE             avg|r|=0.1888  ███████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-    LANGUAGE        avg|r|=0.1874  ███████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    OUROBOROS       avg|r|=0.2772  ███████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    ECON            avg|r|=0.2743  ██████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    NEURO           avg|r|=0.2494  █████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    AGING           avg|r|=0.2288  █████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    TOE             avg|r|=0.2123  ████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    LANGUAGE        avg|r|=0.1949  ███████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
   EXACT PRIMITIVES USED:
   • LP manifold consensus: O(N·D) HiGHS solver, exact global optimum
