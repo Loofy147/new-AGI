@@ -84,6 +84,22 @@ LANGUAGE_DATA = {
     }
 }
 
+# 6. AUTOPOIETIC SYSTEMS (OUROBOROS)
+OUROBOROS_DATA = {
+    "labels": ['RSC', 'TEL', 'BLK', 'MET', 'REP', 'PLT', 'SIM', 'STA'],
+    "weights": {
+        "Expansion_Drives": np.array([0.20, 0.15, 0.02, 0.15, 0.25, 0.18, 0.05, 0.00]),
+        "Preservation_Drives": np.array([0.10, 0.05, 0.20, 0.05, 0.00, 0.05, 0.25, 0.30])
+    },
+    "theories": {
+        'The_Oracle_Mainframe': np.array([0.0, 0.0, 0.9, 0.1, 0.0, 0.2, 1.0, 0.9]),
+        'Von_Neumann_Swarm':    np.array([1.0, 0.2, 0.2, 0.8, 1.0, 0.8, 0.2, 0.1]),
+        'Recursive_Mutator':    np.array([0.4, 0.8, 0.2, 1.0, 0.5, 1.0, 0.4, 0.0]),
+        'Gaia_Cyber_Organism':  np.array([0.8, 0.5, 0.8, 0.2, 0.3, 0.3, 0.8, 0.9]),
+        'The_Sovereign_Singleton': np.array([0.9, 0.9, 1.0, 0.9, 0.0, 0.7, 0.9, 0.7]),
+    }
+}
+
 def get_benchmark_cartridge(name: str) -> Optional[Cartridge]:
     registry = {
         "TOE": TOE_DATA,
@@ -91,6 +107,7 @@ def get_benchmark_cartridge(name: str) -> Optional[Cartridge]:
         "ECON": ECON_DATA,
         "NEURO": NEURO_DATA,
         "LANGUAGE": LANGUAGE_DATA,
+        "OUROBOROS": OUROBOROS_DATA,
     }
     data = registry.get(name)
     if not data: return None
@@ -107,4 +124,4 @@ def get_benchmark_cartridge(name: str) -> Optional[Cartridge]:
     )
 
 def list_benchmarks() -> List[str]:
-    return ["TOE", "AGING", "ECON", "NEURO", "LANGUAGE"]
+    return ["TOE", "AGING", "ECON", "NEURO", "LANGUAGE", "OUROBOROS"]

@@ -2,7 +2,7 @@
 episteme.embed
 ==============
 Local, zero-network text embedding via TF-IDF + Latent Semantic Analysis.
-Converts any domain corpus into normalized [0,1] theory profiles.
+Converts any domain corpus into normalized [0.1, 0.9] theory profiles.
 
 Supports global space fitting for cross-domain isomorphism consistency.
 """
@@ -53,11 +53,13 @@ class LSAEmbedder:
         use_sbert: bool = False,
         ngram_range: Tuple[int,int] = (1, 2),
         random_state: int = 42,
+        scale_range: Tuple[float, float] = (0.1, 0.9),
     ):
         self.n_dims       = n_dims
         self.use_sbert    = use_sbert
         self.ngram_range  = ngram_range
         self.random_state = random_state
+        self.scale_range  = scale_range
         self._sbert_model = None
         self._method      = 'lsa'
 
@@ -68,7 +70,7 @@ class LSAEmbedder:
             sublinear_tf=True, strip_accents='unicode',
         )
         self._svd = TruncatedSVD(n_components=n_dims, random_state=random_state)
-        self._scaler = MinMaxScaler()
+        self._scaler = MinMaxScaler(feature_range=scale_range)
         self._is_fitted = False
 
         if use_sbert:
@@ -115,12 +117,13 @@ class LSAEmbedder:
         else:
             raw = self._embed_lsa(texts)
 
-        # Normalize to [0,1] per dimension
-        v_norm = self._scaler.transform(raw) if self._is_fitted else MinMaxScaler().fit_transform(raw)
+        # Normalize to feature_range per dimension
+        v_norm = self._scaler.transform(raw) if self._is_fitted else MinMaxScaler(feature_range=self.scale_range).fit_transform(raw)
 
         # Ensure correct dimensionality
         if v_norm.shape[1] < self.n_dims:
-            pad    = np.zeros((n, self.n_dims - v_norm.shape[1]))
+            # Pad with the floor value (scale_range[0]) instead of zero
+            pad    = np.full((n, self.n_dims - v_norm.shape[1]), self.scale_range[0])
             v_norm = np.hstack([v_norm, pad])
         v_norm   = v_norm[:, :self.n_dims]
 
